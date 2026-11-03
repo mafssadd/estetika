@@ -7,7 +7,7 @@
 <meta name="description" content="Telegram-канал «Эстетика в чистом виде»: девять фотографий каждый вечер в 20:00. Старая Европа, письма, танцы, музеи.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="author" content="Денис Стрепенюк, +7 977 393-80-33">
-<meta name="theme-color" content="#1d3a2d">
+<meta name="theme-color" content="#1b2031">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Эстетика в чистом виде">
 <meta property="og:description" content="Девять фотографий каждый вечер в 20:00. Без слов, только один знак.">
@@ -15,475 +15,280 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%237b1f24'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Georgia,serif' font-style='italic' font-size='36' fill='%23f0d9a8'%3E%D0%AD%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%238f1f26'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Georgia,serif' font-style='italic' font-size='36' fill='%23f3c38b'%3E%D0%AD%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Marck+Script&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Marck+Script&family=Onest:wght@300;400;500&display=swap" rel="stylesheet">
 <!--
-  Сайт канала «Эстетика в чистом виде» (t.me/fiGlV7t6JrRhMmEy).
+  Сайт канала «Эстетика в чистом виде» (t.me/fiGlV7t6JrRhMmEy). Версия «20:00».
   Разработка — Денис Стрепенюк, +7 977 393-80-33.
-  Стек: GSAP (ScrollTrigger, SplitText, Flip, Draggable, Inertia), Lenis, Motion, three.js, Vanta.
+  Сцена: three.js (отпечатки, свет вечера, мягкие тени), GSAP (таймлайны, SplitText, Flip, Draggable + Inertia).
 -->
 <script>
-// прелоадер «проявка» — только при первом заходе за сессию и без reduced-motion; страховка 6 с, если что-то сломается
-try { if (!matchMedia('(prefers-reduced-motion: reduce)').matches && !sessionStorage.getItem('est-seen')) {
-  document.documentElement.classList.add('js-loading');
-  setTimeout(() => document.documentElement.classList.remove('js-loading'), 6000);
-} } catch (e) {}
+// интро «проявка» запирает прокрутку, пока отпечатки падают на стол; страховка 8 с
+try {
+  const q = new URLSearchParams(location.search);
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && !q.has('p') && !q.has('t') && !sessionStorage.getItem('est3-seen')) {
+    document.documentElement.classList.add('intro');
+    setTimeout(() => document.documentElement.classList.remove('intro'), 8000);
+  }
+} catch (e) {}
 </script>
 <style>
-/* Lenis */
-html.lenis,html.lenis body{height:auto}.lenis:not(.lenis-autoToggle).lenis-stopped{overflow:clip}.lenis [data-lenis-prevent]{overscroll-behavior:contain}.lenis.lenis-smooth iframe{pointer-events:none}
-
 :root{
-  --cloth:#1d3a2d; --cloth-deep:#11261c;
-  --page:#e5e4de; --page-2:#d8d7cf;
-  --ink:#23281f; --muted:#5d6256;
-  --foil:#c9a862; --foil-soft:#d9c591; --gold-ink:#a16207;
-  --wax:#7b1f24; --corner:#262722;
-  --display:"Cormorant Garamond","Old Standard TT",Georgia,serif;
-  --serif:"Old Standard TT",Georgia,"Times New Roman",serif;
-  --hand:"Marck Script","Segoe Script",cursive;
+  --ink:#1f1d1a; --muted:#6f6a61; --wax:#8f1f26; --lamp:#f3c38b; --paper:#ebe7df;
+  --night:#1b2031; --night-ink:#efe9df; --night-muted:rgba(239,233,223,.64);
+  --sky1:#ece8e0; --sky2:#dcd4c6;
+  --fg:var(--ink); --fg-muted:var(--muted); --accent:var(--wax); --pill-bg:var(--ink); --pill-fg:#f3efe7;
+  --display:"Cormorant Garamond",Georgia,serif; --ui:"Onest",system-ui,sans-serif; --hand:"Marck Script",cursive;
   --emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
-  --gutter:clamp(16px,4vw,48px);
-  --foil-grad:linear-gradient(100deg,#8a6a2f 0%,#e8d398 18%,#b08a43 36%,#f4e4ae 52%,#9c7838 70%,#dcc17e 86%,#8f6d31 100%);
-  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --gutter:clamp(18px,4vw,56px); --ease:cubic-bezier(.22,1,.36,1);
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+html.night,.dark{--fg:var(--night-ink); --fg-muted:var(--night-muted); --accent:var(--lamp); --pill-bg:var(--night-ink); --pill-fg:var(--night)}
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-html.js-loading{overflow:hidden}
-body{margin:0;background:var(--page);color:var(--ink);font:400 19px/1.65 var(--serif);overflow-x:hidden}
-img{max-width:100%}
-a{color:inherit}
+html{-webkit-text-size-adjust:100%;background:var(--night)}
+html.intro,html.locked{overflow:hidden}
+body{margin:0;background:var(--night);color:var(--ink);font:300 17px/1.55 var(--ui);-webkit-font-smoothing:antialiased}
 h1,h2,h3,p{margin:0}
-h2{font:500 clamp(44px,5.8vw,76px)/1.02 var(--display);letter-spacing:-.01em}
+a{color:inherit}
 :focus-visible{outline:2px solid currentColor;outline-offset:3px}
-.emoji{font-family:var(--emoji);font-style:normal;line-height:1}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* ткань обложки и фольга */
-.cloth{background-color:var(--cloth);background-image:var(--noise),repeating-linear-gradient(90deg,rgba(255,255,255,.016) 0 1px,transparent 1px 3px),repeating-linear-gradient(0deg,rgba(0,0,0,.05) 0 1px,transparent 1px 3px),radial-gradient(120% 90% at 50% 38%,#285040 0%,var(--cloth) 45%,var(--cloth-deep) 100%)}
-.foil,.is-split.foil .ch{background:var(--foil-grad);background-size:220% 100%;background-position:var(--fx,40%) 0;-webkit-background-clip:text;background-clip:text;color:transparent}
-.foil{filter:drop-shadow(0 -1px 0 rgba(0,0,0,.45)) drop-shadow(0 1px 0 rgba(255,236,190,.14))}
-.is-split.foil{background:none}
+/* шапка */
+.top{position:fixed;inset:0 0 auto;z-index:50;display:flex;align-items:center;gap:28px;padding:16px var(--gutter);color:var(--fg);transition:color .5s,opacity .6s}
+html.intro .top{opacity:0}
+.brand{margin-right:auto;font:600 25px/1 var(--display);letter-spacing:-.01em;text-decoration:none}
+.nav{display:flex;gap:26px}
+.nav a{display:inline-flex;align-items:center;gap:8px;font:400 15px/1 var(--ui);text-decoration:none;color:var(--fg-muted);transition:color .2s}
+.nav a::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);transform:scale(0);transition:transform .3s var(--ease)}
+.nav a:hover,.nav a.on{color:var(--fg)}
+.nav a.on::before{transform:scale(1)}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 22px;border:0;border-radius:999px;background:var(--pill-bg);color:var(--pill-fg);font:500 15px/1 var(--ui);text-decoration:none;cursor:pointer;transition:transform .2s var(--ease),background-color .5s,color .5s}
+.pill:hover{transform:translateY(-1px) scale(1.02)}
+.pill.ghost{background:none;color:var(--fg);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 30%,transparent)}
+.top .pill{min-height:38px;padding:0 18px;font-size:14px}
+.progress{position:absolute;left:0;right:0;bottom:0;height:2px;pointer-events:none}
+.progress i{display:block;height:100%;background:var(--accent);transform-origin:0 50%;transform:scaleX(0)}
 
-/* кнопки */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 26px;border-radius:999px;border:1px solid currentColor;background:none;font:400 17px/1.1 var(--serif);text-decoration:none;cursor:pointer;color:inherit;transition:background-color .25s,color .25s}
-.btn-foil{background:var(--foil-grad);background-size:220% 100%;background-position:var(--fx,40%) 0;border-color:transparent;color:var(--cloth-deep)}
-.btn-ink{background:var(--ink);border-color:var(--ink);color:var(--page)}
-.btn-ink:hover{background:#3a4233}
-.btn[disabled]{opacity:.45;cursor:not-allowed}
-.btn-ghost-foil{border-color:rgba(201,168,98,.6)}
-.btn-ghost-foil:hover{background:rgba(201,168,98,.12)}
+/* сцена */
+.scene{position:relative;height:calc(100svh + 10 * 58svh)}
+.pin{position:sticky;top:0;height:100svh;overflow:hidden;background:linear-gradient(180deg,var(--sky1),var(--sky2))}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+.grain{position:absolute;inset:0;pointer-events:none;background-image:var(--noise);mix-blend-mode:soft-light;opacity:.9}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(125% 95% at 55% 45%,transparent 52%,rgba(40,24,12,.2))}
+.intro-note{position:absolute;left:0;right:0;top:calc(50% - 10px);text-align:center;font:400 14px var(--ui);color:var(--muted);opacity:0;pointer-events:none}
+html.intro .intro-note{opacity:1}
+.fallback{display:none}
+.no-gl .fallback{display:grid;position:absolute;right:7vw;top:50%;transform:translateY(-46%);grid-template-columns:repeat(3,1fr);gap:14px;width:min(44vw,520px)}
+.fallback img{width:100%;aspect-ratio:1;object-fit:cover;border:7px solid #f6f2ea;box-shadow:0 18px 30px -18px rgba(40,24,12,.5)}
 
-/* прелоадер «проявка» */
-.loader{display:none}
-.js-loading .loader{position:fixed;inset:0;z-index:200;display:grid;place-items:center;text-align:center;color:var(--foil-soft)}
-.loader-num{display:block;font:500 clamp(110px,17vw,230px)/1 var(--display);font-variant-numeric:tabular-nums}
-.loader-cap{display:block;margin-top:6px;font:400 clamp(22px,2.3vw,30px)/1.2 var(--hand);color:rgba(217,197,145,.78)}
+/* текст поверх сцены */
+.copy{position:absolute;inset:0;pointer-events:none;color:var(--fg);transition:color .5s}
+.copy a,.copy button{pointer-events:auto}
+.panel{position:absolute;opacity:0;visibility:hidden}
+.eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:18px;font:500 13px/1 var(--ui);color:var(--fg-muted)}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+h1{font:600 clamp(52px,7.6vw,132px)/.86 var(--display);letter-spacing:-.025em}
+.panel h2{font:600 clamp(40px,4.5vw,72px)/.95 var(--display);letter-spacing:-.02em}
+.lede{margin-top:26px;max-width:24em;font-size:18px;color:var(--fg-muted)}
+.body{margin-top:18px;max-width:24em;color:var(--fg-muted)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.status{margin-top:16px;font-size:14px;color:var(--fg-muted)}
+.cue{position:absolute;left:var(--gutter);bottom:5vh;font:400 14px var(--ui);color:var(--fg-muted);opacity:0}
+.cue b{display:inline-block;font-weight:400;animation:nudge 1.8s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(4px)}}
+.hero{left:var(--gutter);top:19vh;max-width:46vw}
+.p1{left:var(--gutter);bottom:12vh;max-width:400px}
+.p2{left:0;right:0;bottom:5vh;margin:0 auto;width:min(620px,92vw);text-align:center}
+.p2 .eyebrow{justify-content:center}
+.p2 .body{margin-left:auto;margin-right:auto}
+.p2 .body,.p2 .cap span{color:var(--fg);opacity:.78}
+.p2::before{content:"";position:absolute;inset:-50px -90px;z-index:-1;pointer-events:none;background:radial-gradient(closest-side,color-mix(in srgb,var(--sky2) 72%,transparent),transparent)}
+.cap{margin-top:18px;min-height:2.6em}
+.cap b{display:block;font:600 30px/1.1 var(--display)}
+.cap span{font-size:14px;color:var(--fg-muted)}
+.p3{left:var(--gutter);top:17vh;max-width:430px}
+.clock{display:flex;align-items:baseline;margin-top:22px;font:300 clamp(56px,5.6vw,92px)/1 var(--ui);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.clock .c{opacity:.45;padding:0 .02em}
+.when{margin-top:6px;font-size:14px;color:var(--fg-muted)}
+.seal{display:inline-flex;align-items:center;gap:14px;margin-top:26px;text-decoration:none;font:500 16px/1.2 var(--ui);color:var(--fg)}
+.seal svg{width:74px;height:74px;flex:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.35));transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.seal:hover svg{transform:rotate(-10deg) scale(.95)}
 
-/* шапка и прогресс чтения */
-.top{position:fixed;inset:0 0 auto;z-index:50;display:flex;align-items:center;gap:24px;padding:12px var(--gutter);color:var(--foil-soft);transition:background-color .4s,color .4s,box-shadow .4s}
-.top.solid{background:rgba(229,228,222,.88);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:var(--ink);box-shadow:0 1px 0 rgba(35,40,31,.1)}
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none;margin-right:auto}
-.mono{display:grid;place-items:center;width:38px;height:38px;border:1px solid currentColor;border-radius:50%;font:italic 400 21px/1 var(--serif)}
-.brand-name{font-size:17px}
-.nav{display:flex;gap:24px}
-.nav a{font-size:17px;text-decoration:none;opacity:.78;transition:opacity .2s}
-.nav a:hover,.nav a.on{opacity:1;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px}
-.top > .btn{min-height:40px;padding:8px 18px;font-size:16px}
-.progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none}
-.progress i{display:block;height:100%;background:var(--foil);transform-origin:0 50%;transform:scaleX(0)}
-.top.solid .progress i{background:var(--gold-ink)}
+/* подписи тем на стене */
+.labels{position:absolute;inset:0;pointer-events:none}
+.lbl{position:absolute;left:0;top:0;display:flex;align-items:center;gap:8px;white-space:nowrap;font:400 14px var(--ui);color:var(--fg-muted);opacity:0;will-change:transform,opacity}
+.lbl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
 
-/* обложка */
-.stage{position:relative}
-.cover{position:relative;min-height:100svh}
-.face{min-height:100svh}
-.front{display:grid;place-items:center;padding:84px var(--gutter) 28px;color:var(--foil-soft);perspective:1400px}
-.back{display:none}
-.frame{width:min(1180px,100%);min-height:calc(100svh - 112px);border:1px solid rgba(201,168,98,.5);outline:1px solid rgba(201,168,98,.28);outline-offset:7px;display:grid;grid-template-columns:1fr auto 1fr;grid-template-areas:"title title title" "lede cameo cta";align-items:center;column-gap:clamp(24px,4vw,64px);row-gap:clamp(16px,3vh,36px);padding:clamp(24px,4vh,48px) clamp(20px,4vw,56px);transform-style:preserve-3d}
-.title{grid-area:title;text-align:center;font:600 min(9.6vw,13.6vh)/.92 var(--display);letter-spacing:-.01em}
-.cameo{grid-area:cameo;position:relative;margin:0;height:min(40vh,380px);aspect-ratio:.72;border-radius:50%;overflow:hidden;box-shadow:0 0 0 3px var(--cloth-deep),0 0 0 5px rgba(201,168,98,.85),0 0 0 9px var(--cloth-deep),0 0 0 10px rgba(201,168,98,.45),0 30px 60px -20px rgba(0,0,0,.6)}
-.cameo img{display:block;width:100%;height:100%;object-fit:cover}
-.cameo::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 40px rgba(10,20,14,.55)}
-.lede{grid-area:lede;text-align:right;font-size:18px;line-height:1.55;max-width:17em;justify-self:end}
-.cover-cta{grid-area:cta;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
-.status{font-size:16px;color:rgba(217,197,145,.85);min-height:1.6em}
+/* тост */
+.toast{position:fixed;left:0;right:0;bottom:26px;z-index:70;width:max-content;max-width:90vw;margin:0 auto;padding:12px 20px;border-radius:999px;background:var(--night);color:var(--night-ink);font:400 15px var(--ui);box-shadow:0 18px 40px -16px rgba(0,0,0,.5);opacity:0;transform:translateY(12px);transition:opacity .35s,transform .35s var(--ease);pointer-events:none}
+.toast.show{opacity:1;transform:none}
 
-/* разворот под обложкой */
-.inside{position:relative;min-height:100svh;display:grid;place-items:center;padding:110px var(--gutter) 70px;background:var(--page)}
-.note{max-width:30em;text-align:center;font:400 clamp(25px,2.6vw,34px)/1.5 var(--hand);color:var(--ink)}
-.note .ln{display:block;padding:0 .2em;text-wrap:balance}
-.note .emoji{display:block;margin-top:26px;font-size:42px}
-.shade{position:absolute;inset:0;background:#0d1a13;opacity:0;pointer-events:none}
-
-/* фото в уголках */
-.print{--c:22px;position:relative;margin:0;background:#cfcabf;box-shadow:0 1px 2px rgba(0,0,0,.2),0 10px 20px -12px rgba(0,0,0,.45)}
-.print img{display:block;width:100%;height:100%;object-fit:cover}
-.print::after{content:"";position:absolute;inset:-5px;pointer-events:none;background:linear-gradient(135deg,var(--corner) 50%,transparent 50%) 0 0/var(--c) var(--c) no-repeat,linear-gradient(225deg,var(--corner) 50%,transparent 50%) 100% 0/var(--c) var(--c) no-repeat,linear-gradient(45deg,var(--corner) 50%,transparent 50%) 0 100%/var(--c) var(--c) no-repeat,linear-gradient(315deg,var(--corner) 50%,transparent 50%) 100% 100%/var(--c) var(--c) no-repeat;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
-.print[role="button"]{cursor:zoom-in}
-.sq{aspect-ratio:1}
-
-/* альбом 3×3 */
-.album{padding:clamp(80px,13vh,150px) var(--gutter) clamp(70px,11vh,120px);text-align:center;overflow-x:clip}
-.lead{max-width:30em;margin:18px auto 0;color:var(--muted)}
-.spread{position:relative;width:min(700px,100%);margin:clamp(36px,6vh,60px) auto 0}
-.grid9{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,2.2vw,22px);padding:clamp(16px,3vw,32px);background:var(--page-2);box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 36px 60px -36px rgba(35,40,31,.45)}
-.glassine{display:none;position:absolute;inset:-10px -8px;background-color:rgba(242,242,236,.6);background-image:var(--noise),linear-gradient(to top,rgba(255,255,255,.55),rgba(255,255,255,0) 14px);-webkit-backdrop-filter:blur(8px) saturate(.75);backdrop-filter:blur(8px) saturate(.75);box-shadow:0 1px 0 rgba(255,255,255,.7) inset;pointer-events:none}
-.js-motion .glassine{display:block}
-.sign{margin-top:34px}
-.sign .emoji{display:block;font-size:40px}
-.sign .hand{display:block;margin-top:10px;font:400 27px/1.3 var(--hand);color:var(--muted)}
-.mini-cta{margin-top:26px}
-
-/* разделы */
-.chapters{padding:clamp(70px,10vh,120px) 0;overflow:hidden}
-.chap-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;padding:0 var(--gutter);max-width:1280px;margin:0 auto clamp(28px,5vh,48px)}
-.chap-head p{color:var(--muted)}
-.track{display:flex;gap:clamp(16px,3vw,44px);padding:0 var(--gutter) 10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
-.track::-webkit-scrollbar{display:none}
-.chap{flex:0 0 min(1000px,80vw);scroll-snap-align:center;display:grid;grid-template-columns:minmax(220px,300px) 1fr;align-items:center;gap:clamp(24px,4vw,56px);padding:clamp(24px,3.4vw,52px);background:var(--page-2);box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 36px 60px -40px rgba(35,40,31,.5)}
-.chap h3{font:400 clamp(42px,4.2vw,60px)/1.05 var(--hand);color:var(--ink)}
-.chap .emoji{display:block;font-size:32px;margin:14px 0 16px}
-.chap p{color:var(--muted);max-width:20em}
-.collage{display:grid;grid-template-columns:1.25fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));gap:24px;height:min(54vh,500px)}
-.collage .print{min-height:0}
-.collage .print:nth-child(1){grid-row:1/3;transform:rotate(-1.2deg)}
-.collage .print:nth-child(2){transform:rotate(1.6deg)}
-.collage .print:nth-child(3){transform:rotate(-.9deg)}
-.chap-end{padding:0 var(--gutter);max-width:1280px;margin:clamp(24px,4vh,40px) auto 0}
-.js-pin{min-height:100svh;display:flex;flex-direction:column;justify-content:center}
-.js-pin .track{overflow:visible;scroll-snap-type:none;width:max-content}
-.js-pin .swipe{display:none}
-
-/* архив: 3D-кольцо из фото */
-.archive{padding:clamp(70px,10vh,120px) 0 clamp(50px,8vh,90px);overflow:hidden;text-align:center}
-.archive .lead{padding:0 var(--gutter)}
-.arch-stage{position:relative;margin-top:clamp(18px,3vh,36px)}
-.arch-canvas{display:none;width:100%;height:min(56vh,520px);touch-action:pan-y;cursor:grab;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
-.arch-canvas:active{cursor:grabbing}
-.has-webgl .arch-canvas{display:block}
-.arch-cap{display:none;min-height:3.4em;margin-top:6px}
-.has-webgl .arch-cap{display:block}
-.arch-cap .hand{display:block;font:400 clamp(26px,2.6vw,34px)/1.2 var(--hand);color:var(--ink)}
-.arch-cap .n{font-size:15px;color:var(--muted)}
-.arch-list{list-style:none;margin:0 auto;padding:0 var(--gutter);max-width:1280px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
-.arch-list button{display:block;width:100%;aspect-ratio:3/4;padding:0;border:0;background:#cfcabf;cursor:zoom-in;overflow:hidden}
-.arch-list img{display:block;width:100%;height:100%;object-fit:cover}
-.has-webgl .arch-list{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;padding:0}
-.js-pin-arch{min-height:100svh;display:flex;flex-direction:column;justify-content:center}
-
-/* вечер: раскрывающееся окно (21st «scroll media expansion») */
-.expand{position:relative;min-height:100svh;display:grid;place-items:center;padding:170px var(--gutter) 70px;overflow:hidden}
-.expand-media{position:absolute;inset:0;background:#b98a5c url(img/dome-1200.webp) center 38%/cover}
-.sky{position:absolute;inset:0}
-.expand-title{position:absolute;left:0;right:0;top:clamp(70px,9vh,100px);z-index:1;display:flex;flex-wrap:wrap;justify-content:center;column-gap:.28em;padding:0 var(--gutter);text-align:center;color:var(--ink);text-shadow:0 1px 24px rgba(255,248,235,.55);pointer-events:none}
-.expand-title span{display:inline-block;white-space:nowrap}
-.js-expand{height:100svh;min-height:0;padding:0}
-.js-expand .expand-title{top:50%;transform:translateY(-50%);font-size:clamp(48px,8vw,120px)}
-.card-glass{position:relative;z-index:2;width:min(620px,100%);padding:clamp(26px,4.4vh,50px) clamp(22px,4vw,50px);text-align:center;background:rgba(236,234,227,.8);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 50px 90px -40px rgba(50,28,10,.55)}
-.when{color:var(--muted)}
-.clock{display:flex;justify-content:center;align-items:baseline;margin:clamp(10px,2vh,18px) 0 4px;font:400 clamp(56px,9vw,104px)/1 var(--serif);color:var(--ink)}
-.clock .d{display:inline-block;width:.62em;text-align:center}
-.clock .c{padding:0 .04em;opacity:.55}
-.clock-cap{font-size:16px;color:var(--muted)}
-.facts{list-style:none;margin:clamp(16px,3vh,28px) auto clamp(18px,3.4vh,30px);padding:0;max-width:24em}
-.facts li{padding:12px 0;border-top:1px solid rgba(35,40,31,.14)}
-.facts li:last-child{border-bottom:1px solid rgba(35,40,31,.14)}
-.seal{display:inline-flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:var(--wax);font-size:18px}
-.seal svg{width:104px;height:104px;filter:drop-shadow(0 8px 10px rgba(70,15,18,.35));transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
-.seal:hover svg{transform:rotate(-8deg)}
-.card-glass .seal svg{width:86px;height:86px}
-
-/* открытка */
-.maker{padding:clamp(80px,12vh,140px) var(--gutter)}
+/* открытка (ночная часть страницы) */
+.maker{padding:clamp(90px,13vh,150px) var(--gutter);background:var(--night);color:var(--fg)}
 .maker-head{max-width:1160px;margin:0 auto}
-.maker-head p{max-width:32em;margin-top:16px;color:var(--muted)}
+.maker-head h2{font:600 clamp(40px,4.5vw,72px)/.95 var(--display);letter-spacing:-.02em}
+.maker-head p{max-width:32em;margin-top:16px;color:var(--fg-muted)}
 .maker-body{max-width:1160px;margin:clamp(32px,6vh,56px) auto 0;display:grid;grid-template-columns:minmax(260px,440px) 1fr;gap:clamp(28px,5vw,72px);align-items:start}
-.preview{position:sticky;top:96px;display:grid;place-items:center}
-.preview canvas{display:block;width:auto;height:auto;max-width:100%;max-height:74vh;background:var(--page);box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 40px 70px -36px rgba(35,40,31,.55)}
-.tabs{display:inline-flex;gap:6px;padding:5px;border:1px solid rgba(35,40,31,.25);border-radius:999px;margin-bottom:30px}
-.tabs button{border:0;border-radius:999px;background:none;padding:10px 22px;font:400 17px/1 var(--serif);color:var(--ink);cursor:pointer}
-.tabs button[aria-selected="true"]{background:var(--ink);color:var(--page)}
+.preview{position:sticky;top:90px;display:grid;place-items:center}
+.preview canvas{display:block;width:auto;height:auto;max-width:100%;max-height:74vh;box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
+.tabs{display:inline-flex;gap:6px;padding:5px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(239,233,223,.22);margin-bottom:30px}
+.tabs button{border:0;border-radius:999px;background:none;padding:10px 22px;font:400 16px/1 var(--ui);color:var(--fg);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--night)}
 .ctl{border:0;padding:0;margin:0 0 28px;min-width:0}
-.ctl legend{padding:0;margin-bottom:12px;font-size:16px;color:var(--muted)}
+.ctl legend{padding:0;margin-bottom:12px;font-size:15px;color:var(--fg-muted)}
 .ctl[hidden]{display:none}
-.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:8px}
-.thumbs button{position:relative;aspect-ratio:1;padding:0;border:0;background:#cfcabf;cursor:pointer;overflow:hidden}
-.thumbs img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .3s}
-.thumbs button:hover img{transform:scale(1.06)}
-.thumbs button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
-.thumbs button[data-n]::after{content:attr(data-n);position:absolute;right:4px;top:4px;min-width:22px;height:22px;border-radius:11px;background:var(--ink);color:var(--page);font:14px/22px var(--serif);text-align:center}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:8px}
+.thumbs button{position:relative;aspect-ratio:1;padding:0;border:0;background:#2a3044;cursor:pointer;overflow:hidden;transition:transform .2s var(--ease)}
+.thumbs button:hover{transform:translateY(-2px)}
+.thumbs img{display:block;width:100%;height:100%;object-fit:cover}
+.thumbs button[aria-pressed="true"]{outline:2px solid var(--lamp);outline-offset:2px}
+.thumbs button[data-n]::after{content:attr(data-n);position:absolute;right:4px;top:4px;min-width:22px;height:22px;border-radius:11px;background:var(--lamp);color:var(--night);font:500 13px/22px var(--ui);text-align:center}
 .accents{display:flex;flex-wrap:wrap;gap:8px}
-.accents button{width:50px;height:50px;border-radius:50%;border:1px solid rgba(35,40,31,.22);background:none;font:24px/1 var(--emoji);cursor:pointer}
-.accents button[aria-pressed="true"]{border-color:var(--ink);background:rgba(35,40,31,.08);box-shadow:0 0 0 1px var(--ink)}
-.txt{width:100%;padding:6px 2px;border:0;border-bottom:1px solid rgba(35,40,31,.4);background:none;font:400 30px/1.3 var(--hand);color:var(--ink)}
-.txt:focus{outline:none;border-bottom-color:var(--ink)}
+.accents button{width:50px;height:50px;border-radius:50%;border:1px solid rgba(239,233,223,.22);background:none;font:24px/1 var(--emoji);cursor:pointer}
+.accents button[aria-pressed="true"]{border-color:var(--lamp);box-shadow:0 0 0 1px var(--lamp)}
+.txt{width:100%;padding:6px 2px;border:0;border-bottom:1px solid rgba(239,233,223,.35);background:none;font:400 30px/1.3 var(--hand);color:var(--fg)}
+.txt:focus{outline:none;border-bottom-color:var(--lamp)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.chips button,.fmt button,.linkish{border:1px solid rgba(35,40,31,.3);border-radius:999px;background:none;padding:8px 16px;font:400 16px/1.1 var(--serif);color:var(--ink);cursor:pointer}
+.chips button,.fmt button,.linkish{border:1px solid rgba(239,233,223,.28);border-radius:999px;background:none;padding:8px 16px;font:400 15px/1.1 var(--ui);color:var(--fg);cursor:pointer}
 .fmt{display:flex;gap:8px}
-.fmt button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--page)}
+.fmt button[aria-pressed="true"]{background:var(--fg);color:var(--night);border-color:var(--fg)}
 .linkish{margin-top:12px}
 .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
-.msg{min-height:1.6em;margin-top:12px;font-size:16px;color:var(--muted)}
+.actions .pill[disabled]{opacity:.4;cursor:not-allowed}
+.msg{min-height:1.6em;margin-top:12px;font-size:15px;color:var(--fg-muted)}
+
+/* подвал */
+.end{padding:clamp(90px,15vh,170px) var(--gutter) 36px;background:var(--night);color:var(--fg);text-align:center;overflow:hidden}
+.huge{font:600 clamp(72px,19vw,300px)/.88 var(--display);letter-spacing:-.02em}
+.huge-sub{margin:12px 0 clamp(40px,7vh,70px);font:500 clamp(28px,4.2vw,58px)/1.1 var(--display);color:var(--fg-muted)}
+.end .seal{margin-top:0}
+.credit{margin-top:clamp(60px,10vh,110px);font-size:14px;color:var(--fg-muted)}
 
 /* просмотр фото */
 .lb{position:fixed;inset:0;z-index:150;display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);align-items:center;gap:clamp(20px,4vw,56px);padding:clamp(72px,9vh,100px) clamp(16px,5vw,80px)}
 .lb[hidden]{display:none}
-.lb-bg{position:absolute;inset:0;background:rgba(14,32,23,.93);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.lb-fig{--c:28px;justify-self:center;width:fit-content;background:none;box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
-.lb-fig.flying{box-shadow:none}
-.lb-fig.flying::after{opacity:0}
-.lb-fig::after{transition:opacity .3s}
-.lb-fig img{width:auto;height:auto;max-width:100%;max-height:calc(100svh - 200px);object-fit:contain}
-.lb-info{position:relative;color:var(--foil-soft)}
-.lb-cap{font:500 clamp(32px,3.2vw,46px)/1.1 var(--display);color:#f1e6c8}
-.lb-sub{margin:10px 0 24px;color:rgba(217,197,145,.8)}
-.lb-info .btn{display:flex;width:100%;margin-top:10px}
-.lb-close{position:absolute;top:16px;right:16px;z-index:2;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:1px solid rgba(201,168,98,.6);background:rgba(14,32,23,.4);color:var(--foil-soft);cursor:pointer}
+.lb-bg{position:absolute;inset:0;background:rgba(18,20,30,.94)}
+.lb-fig{position:relative;justify-self:center;margin:0;padding:clamp(8px,1vw,14px);background:#f6f2ea;box-shadow:0 40px 80px -30px rgba(0,0,0,.8)}
+.lb-fig img{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100svh - 220px)}
+.lb-info{position:relative;color:var(--night-ink)}
+.lb-cap{font:600 clamp(32px,3.2vw,46px)/1.1 var(--display)}
+.lb-sub{margin:10px 0 24px;color:var(--night-muted)}
+.lb-info .pill{display:flex;width:100%;margin-top:10px;background:var(--night-ink);color:var(--night)}
+.lb-info .pill.ghost{background:none;color:var(--night-ink);box-shadow:inset 0 0 0 1px rgba(239,233,223,.3)}
+.lb-close{position:absolute;top:16px;right:16px;z-index:2;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:1px solid rgba(239,233,223,.35);background:none;color:var(--night-ink);cursor:pointer}
 .lb-close svg{width:22px;height:22px}
 
-/* задняя обложка */
-.back-cover{padding:clamp(90px,15vh,170px) var(--gutter) 36px;text-align:center;color:var(--foil-soft);overflow:hidden}
-.huge{font:600 clamp(72px,19vw,300px)/.9 var(--display);letter-spacing:-.015em}
-.huge-sub{font:500 clamp(30px,4.4vw,60px)/1.1 var(--display);margin:10px 0 clamp(40px,7vh,70px)}
-.back-cover .seal{color:var(--foil-soft)}
-.credit{margin-top:clamp(60px,10vh,110px);font-size:14px;color:rgba(217,197,145,.75)}
-.credit a{text-underline-offset:3px}
-
 @media (max-width:900px){
-  .frame{grid-template-columns:1fr;grid-template-areas:"title" "cameo" "lede" "cta";justify-items:center;text-align:center;row-gap:clamp(14px,2.4vh,26px)}
-  .title{font-size:min(15vw,9.5vh)}
-  .cameo{height:min(34vh,330px)}
-  .lede{text-align:center;justify-self:center;font-size:17px}
-  .cover-cta{align-items:center}
   .maker-body{grid-template-columns:1fr}
   .preview{position:static}
-  .preview canvas{max-height:62vh}
+  .preview canvas{max-height:56vh}
   .lb{grid-template-columns:1fr;align-content:center;text-align:center}
-  .lb-fig img{max-height:56svh}
-  .lb-info .btn{display:inline-flex;width:auto}
+  .lb-fig img{max-height:54svh}
+  .lb-info .pill{display:inline-flex;width:auto}
 }
 @media (max-width:760px){
-  body{font-size:18px}
-  .brand-name{display:none}
-  .nav{position:absolute;left:0;right:0;top:100%;gap:6px;padding:8px 16px 10px;overflow-x:auto;scrollbar-width:none;background:rgba(229,228,222,.94);box-shadow:0 1px 0 rgba(35,40,31,.1);visibility:hidden;opacity:0;transition:opacity .3s}
-  .nav::-webkit-scrollbar{display:none}
-  .top.solid .nav{visibility:visible;opacity:1}
-  .nav a{flex:none;padding:5px 13px;border:1px solid rgba(35,40,31,.22);border-radius:999px;font-size:15px;line-height:1.4;opacity:1;text-decoration:none}
-  .nav a.on{background:var(--ink);color:var(--page);text-decoration:none}
-  .top{padding-top:8px;padding-bottom:8px}
-  .mono{width:34px;height:34px;font-size:19px}
-  .top > .btn{min-height:36px;padding:6px 16px;font-size:15px}
-  .front{padding-top:66px}
-  .frame{outline-offset:5px;min-height:calc(100svh - 90px);padding:22px 16px}
-  .title{font-size:min(13.6vw,8.6vh)}
-  .cameo{height:min(36vh,330px)}
-  .note{font-size:23px}
-  .print{--c:13px}
-  .print::after{inset:-3px}
-  .grid9{gap:9px;padding:12px}
-  .album{padding-bottom:40px}
-  .chapters{padding-top:50px}
-  .chap{flex-basis:86vw;grid-template-columns:1fr;gap:18px;padding:22px}
-  .chap .emoji{margin:8px 0 6px}
-  .collage{height:330px;gap:16px}
-  .arch-canvas{height:44svh}
-  .arch-list{grid-auto-flow:column;grid-auto-columns:42vw;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory}
-  .arch-list li{scroll-snap-align:start}
-  .expand{padding-top:150px}
-  .expand-media{background-image:url(img/sky-1200.webp);background-position:center 62%}
-  .js-expand{padding:0}
-  .clock .d{width:.6em}
-  .preview canvas{max-height:52vh}
+  body{font-size:16px}
+  .nav{display:none}
+  .top{padding-top:12px;padding-bottom:12px}
+  .hero{top:12vh;max-width:none;right:var(--gutter)}
+  .lede{font-size:16px;margin-top:16px}
+  .cta{margin-top:20px}
+  .p1{bottom:5vh;right:var(--gutter);max-width:none}
+  .p2{bottom:3vh}
+  .p3{top:11vh;right:var(--gutter);max-width:none}
+  .p3 .body{font-size:15px;margin-top:12px}
+  .p3 .seal{margin-top:16px}
+  .p3 .seal svg{width:56px;height:56px}
+  .hero .pill.ghost,.cue{display:none}
+  .clock{margin-top:12px}
+  .labels{display:none}
+  .no-gl .fallback{right:auto;left:var(--gutter);top:auto;bottom:8vh;transform:none;width:calc(100% - 2 * var(--gutter))}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none!important;animation:none!important}
 }
-
-/* стопка «обложка над разворотом» — только при анимации */
-.stage.stacked{height:100svh;overflow:hidden;perspective:2600px;perspective-origin:30% 50%}
-.stage.stacked .cover{position:absolute;inset:0;z-index:2;transform-style:preserve-3d;transform-origin:0 50%}
-.stage.stacked .face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden}
-.stage.stacked .back{display:block;transform:rotateY(180deg);background:#2a3d30 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='m' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .016' numOctaves='5' seed='11'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='table' tableValues='.10 .80 .16 .62 .13 .88 .11 .70 .14'/%3E%3CfeFuncG type='table' tableValues='.21 .68 .30 .50 .24 .80 .22 .58 .27'/%3E%3CfeFuncB type='table' tableValues='.16 .44 .22 .31 .18 .62 .17 .36 .20'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E") center/cover;box-shadow:inset -40px 0 60px rgba(0,0,0,.35)}
-.stage.stacked .inside{position:absolute;inset:0;z-index:1}
 </style>
 </head>
 <body>
 
-<div class="loader cloth" aria-hidden="true">
-  <div><span class="loader-num foil">0</span><span class="loader-cap">проявляем фотографии</span></div>
-</div>
-
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <radialGradient id="wax" cx=".36" cy=".3" r=".78"><stop offset="0" stop-color="#b8474e"/><stop offset=".5" stop-color="#7b1f24"/><stop offset="1" stop-color="#430d11"/></radialGradient>
+    <radialGradient id="wax" cx=".36" cy=".3" r=".78"><stop offset="0" stop-color="#bd4a51"/><stop offset=".5" stop-color="#8f1f26"/><stop offset="1" stop-color="#4a0d12"/></radialGradient>
     <symbol id="seal" viewBox="0 0 120 120">
       <path fill="url(#wax)" d="M109.0 60.0 Q114.8 68.5 114.3 75.9 Q112.6 83.8 105.0 88.9 Q101.2 95.4 92.8 97.8 Q89.6 106.9 83.1 110.6 Q76.4 115.5 67.8 114.1 Q60.3 115.2 52.8 110.1 Q43.9 113.5 36.8 110.7 Q28.4 109.2 23.5 102.2 Q17.6 97.2 16.5 88.0 Q8.8 83.1 6.8 75.6 Q2.6 68.3 4.8 60.0 Q3.8 52.1 9.1 45.0 Q9.3 36.8 15.2 31.2 Q17.6 23.2 24.7 19.3 Q29.7 13.1 38.2 12.2 Q44.2 5.6 52.1 5.1 Q59.8 3.5 67.4 8.3 Q75.5 7.3 81.8 12.3 Q90.4 13.0 95.6 18.9 Q104.1 22.0 107.6 29.4 Q112.2 35.9 110.9 45.1 Q112.9 52.1 109.0 60.0Z"/>
       <circle cx="60" cy="60" r="37" fill="none" stroke="#4d1115" stroke-width="3" opacity=".75"/>
       <circle cx="60" cy="61.5" r="37" fill="none" stroke="#d26a71" stroke-width="1.2" opacity=".35"/>
-      <text x="60" y="76" text-anchor="middle" font-family="Old Standard TT,Georgia,serif" font-style="italic" font-size="44" fill="#4d1115">Э</text>
-      <text x="60" y="77.5" text-anchor="middle" font-family="Old Standard TT,Georgia,serif" font-style="italic" font-size="44" fill="#d26a71" opacity=".3">Э</text>
+      <text x="60" y="76" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-style="italic" font-size="46" font-weight="600" fill="#4d1115">Э</text>
     </symbol>
   </defs>
 </svg>
 
 <header class="top" id="top">
-  <a class="brand" href="#cover" aria-label="Эстетика в чистом виде, в начало"><span class="mono">Э</span><span class="brand-name">Эстетика в чистом виде</span></a>
-  <nav class="nav" aria-label="Разделы сайта">
-    <a href="#album">Альбом</a>
-    <a href="#chapters">Разделы</a>
-    <a href="#archive">Архив</a>
-    <a href="#evening">20:00</a>
-    <a href="#card">Открытка</a>
+  <a class="brand" href="#" data-go="0" aria-label="Эстетика в чистом виде, в начало">Эстетика</a>
+  <nav class="nav" aria-label="Разделы">
+    <a href="#album" data-go="0.27">Альбом</a>
+    <a href="#archive" data-go="0.6">Архив</a>
+    <a href="#evening" data-go="0.97">20:00</a>
+    <a href="#card" data-sec="card">Открытка</a>
   </nav>
-  <a class="btn" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener">Подписаться</a>
+  <a class="pill" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener">Подписаться</a>
   <div class="progress" aria-hidden="true"><i></i></div>
 </header>
 
 <main>
-<div class="stage" id="cover">
-  <section class="cover" aria-label="Обложка альбома">
-    <div class="face front cloth">
-      <div class="frame">
-        <h1 class="title foil">Эстетика<br>в чистом виде</h1>
-        <figure class="cameo"><img src="img/sky-600.webp" srcset="img/sky-600.webp 600w, img/sky-1200.webp 736w" sizes="300px" alt="Двое танцуют на холме под золотыми облаками" fetchpriority="high"></figure>
-        <p class="lede">Telegram-канал. Девять фотографий каждый вечер в&nbsp;20:00 — без слов, только один знак настроения.</p>
-        <div class="cover-cta">
-          <a class="btn btn-foil" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener">Подписаться в Telegram</a>
-          <a class="btn btn-ghost-foil" href="#album">Открыть альбом</a>
-          <p class="status" data-status>Новый альбом каждый вечер в 20:00</p>
+<div class="scene" id="scene">
+  <div class="pin">
+    <canvas id="gl" aria-label="Альбом из девяти фотографий на столе" role="img"></canvas>
+    <div class="fallback" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <p class="intro-note" aria-hidden="true">проявляем девять фотографий</p>
+    <div class="labels" aria-hidden="true"></div>
+    <div class="copy">
+      <section class="panel hero" aria-labelledby="h-hero">
+        <p class="eyebrow">Telegram-канал</p>
+        <h1 id="h-hero">Эстетика<br>в чистом виде</h1>
+        <p class="lede">Девять фотографий каждый вечер в&nbsp;20:00. Без слов — только один знак настроения.</p>
+        <div class="cta">
+          <a class="pill" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener">Подписаться в Telegram</a>
+          <a class="pill ghost" href="#album" data-go="0.27">Открыть альбом</a>
         </div>
-      </div>
+        <p class="status" data-status>Новый альбом каждый вечер в 20:00</p>
+      </section>
+      <p class="cue" aria-hidden="true">Листайте — альбом поднимется <b>↓</b></p>
+      <section class="panel p1" id="album" aria-labelledby="h-p1">
+        <p class="eyebrow">Один вечер</p>
+        <h2 id="h-p1">Девять фотографий и&nbsp;ни одного лишнего слова</h2>
+        <p class="body">Каждый альбом — девять кадров одного настроения: старая Европа, письма с сургучом, танцы, музейное золото. Нажмите на любой — рассмотреть ближе.</p>
+      </section>
+      <section class="panel p2" id="archive" aria-labelledby="h-p2">
+        <p class="eyebrow">Архив</p>
+        <h2 id="h-p2">Весь архив — вокруг вас</h2>
+        <p class="body">Крутите кольцо мышкой или пальцем. Нажмите на фото — рассмотреть его и сделать открытку.</p>
+        <p class="cap" aria-live="polite"><b data-cap></b><span data-cap-n></span></p>
+      </section>
+      <section class="panel p3" id="evening" aria-labelledby="h-p3">
+        <p class="eyebrow">Завтрашний альбом</p>
+        <h2 id="h-p3">Перевернётся в&nbsp;20:00</h2>
+        <div class="clock" data-clock aria-hidden="true"></div>
+        <p class="when" data-when>до нового альбома, по Москве</p>
+        <p class="body">Девять новых фотографий уже лежат рубашкой вверх. Можно подсмотреть — нажмите на любую. Остальное — в канале.</p>
+        <a class="seal" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#seal"/></svg>Подписаться,<br>чтобы увидеть первыми</a>
+      </section>
     </div>
-    <div class="face back" aria-hidden="true"></div>
-  </section>
-
-  <section class="inside" aria-label="Первая страница">
-    <p class="note">
-      <span class="ln">Это альбом канала «Эстетика в чистом виде».</span>
-      <span class="ln">Здесь только красивое: старая Европа,</span>
-      <span class="ln">письма с сургучом, танцы и музейное золото.</span>
-      <span class="ln">Каждый вечер в&nbsp;20:00&nbsp;— девять фотографий.</span>
-      <span class="ln">Без слов, только один знак.</span>
-      <span class="emoji ln" aria-hidden="true">🌟</span>
-    </p>
-    <div class="shade" aria-hidden="true"></div>
-  </section>
+  </div>
 </div>
 
-<section class="album" id="album" aria-labelledby="album-h">
-  <h2 id="album-h" data-blur>Один вечер в канале</h2>
-  <p class="lead" data-rise>Так выглядит каждый выпуск: девять фотографий и один знак вместо подписи. Нажмите на фото, чтобы рассмотреть.</p>
-  <div class="spread">
-    <div class="grid9">
-      <figure class="print sq"><img src="img/dome-600.webp" srcset="img/dome-600.webp 600w, img/dome-1200.webp 1200w" sizes="(max-width:760px) 30vw, 210px" alt="Купол собора и статуя ангела на мосту в закатном свете" loading="lazy" decoding="async"></figure>
-      <figure class="print sq"><img src="img/seal-600.webp" sizes="(max-width:760px) 30vw, 210px" alt="Конверт с сургучной печатью" loading="lazy" decoding="async"></figure>
-      <figure class="print sq"><img src="img/shadow-dance-600.webp" srcset="img/shadow-dance-600.webp 600w, img/shadow-dance-1200.webp 1080w" sizes="(max-width:760px) 30vw, 210px" alt="Силуэты танцующей пары на старой бумаге" loading="lazy" decoding="async"></figure>
-      <figure class="print sq"><img src="img/arches-600.webp" srcset="img/arches-600.webp 600w, img/arches-1200.webp 683w" sizes="(max-width:760px) 30vw, 210px" alt="Вид через каменные арки на здание парламента в Будапеште" loading="lazy" decoding="async"></figure>
-      <figure class="print sq"><img src="img/lamp-600.webp" srcset="img/lamp-600.webp 600w, img/lamp-1200.webp 1108w" sizes="(max-width:760px) 30vw, 210px" alt="Пара под уличным фонарём вечером" loading="lazy" decoding="async"></figure>
-      <figure class="print sq"><img src="img/letters-600.webp" srcset="img/letters-600.webp 600w, img/letters-1200.webp 729w" sizes="(max-width:760px) 30vw, 210px" alt="Письма от руки с золотыми краями" loading="lazy" decoding="async"></figure>
-      <figure class="print sq"><img src="img/napoleon-600.webp" srcset="img/napoleon-600.webp 600w, img/napoleon-1200.webp 941w" sizes="(max-width:760px) 30vw, 210px" alt="Человек перед картиной с Наполеоном на коне в музее" loading="lazy" decoding="async"></figure>
-      <figure class="print sq"><img src="img/roses-600.webp" srcset="img/roses-600.webp 600w, img/roses-1200.webp 1200w" sizes="(max-width:760px) 30vw, 210px" alt="Букет розовых роз переходит из рук в руки на фоне неба" loading="lazy" decoding="async"></figure>
-      <figure class="print sq"><img src="img/ceiling-600.webp" srcset="img/ceiling-600.webp 600w, img/ceiling-1200.webp 1047w" sizes="(max-width:760px) 30vw, 210px" alt="Расписной позолоченный купол изнутри" loading="lazy" decoding="async"></figure>
-    </div>
-    <div class="glassine" aria-hidden="true"></div>
-  </div>
-  <p class="sign" data-rise><span class="emoji" aria-hidden="true">🕊</span><span class="hand">и один знак вместо подписи</span></p>
-  <a class="btn btn-ink mini-cta" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener" data-rise>Получать такие альбомы</a>
-</section>
-
-<section class="chapters" id="chapters" aria-labelledby="chap-h">
-  <div class="chap-head">
-    <h2 id="chap-h" data-blur>О чём альбомы</h2>
-    <p class="swipe">Листайте вбок</p>
-  </div>
-  <div class="track">
-    <article class="chap">
-      <div class="chap-text"><h3>Старая Европа</h3><span class="emoji" aria-hidden="true">🌟</span><p>Купола, арки и фасады в вечернем свете.</p></div>
-      <div class="collage">
-        <figure class="print"><img src="img/parliament-600.webp" srcset="img/parliament-600.webp 600w, img/parliament-1200.webp 1200w" sizes="(max-width:760px) 50vw, 360px" alt="Здание парламента в Будапеште" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/palace-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Белый фасад дворца со скульптурой на крыше" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/arcade-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Арка с видом на старые дома" loading="lazy" decoding="async"></figure>
-      </div>
-    </article>
-    <article class="chap">
-      <div class="chap-text"><h3>Письма</h3><span class="emoji" aria-hidden="true">🕊</span><p>Конверты, сургуч, строчки от руки.</p></div>
-      <div class="collage">
-        <figure class="print"><img src="img/envelopes-600.webp" srcset="img/envelopes-600.webp 600w, img/envelopes-1200.webp 1170w" sizes="(max-width:760px) 50vw, 360px" alt="Россыпь конвертов с фотографиями" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/found-him-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Смятая бумага с надписью «i finally found him»" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/seal-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Конверт с сургучной печатью" loading="lazy" decoding="async"></figure>
-      </div>
-    </article>
-    <article class="chap">
-      <div class="chap-text"><h3>Танцы</h3><span class="emoji" aria-hidden="true">🩰</span><p>Пары в движении, свечи, тени на стене.</p></div>
-      <div class="collage">
-        <figure class="print"><img src="img/dance-paint-600.webp" sizes="(max-width:760px) 50vw, 360px" alt="Пара в танце, размытая, как на старой картине" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/paris-hands-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Руки пары на фоне Эйфелевой башни" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/candles-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Поцелуй под фатой среди свечей" loading="lazy" decoding="async"></figure>
-      </div>
-    </article>
-    <article class="chap">
-      <div class="chap-text"><h3>Музеи</h3><span class="emoji" aria-hidden="true">🖤</span><p>Мрамор, позолота и картины в тяжёлых рамах.</p></div>
-      <div class="collage">
-        <figure class="print"><img src="img/statue-600.webp" srcset="img/statue-600.webp 600w, img/statue-1200.webp 841w" sizes="(max-width:760px) 50vw, 360px" alt="Мраморная статуя у красного бархата" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/gilded-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Позолоченная скульптура на фасаде" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/cathedral-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Резной фасад собора с куполами" loading="lazy" decoding="async"></figure>
-      </div>
-    </article>
-    <article class="chap">
-      <div class="chap-text"><h3>Old money</h3><span class="emoji" aria-hidden="true">🦢</span><p>Твид, шахматы, старые машины — вещи с историей.</p></div>
-      <div class="collage">
-        <figure class="print"><img src="img/mercedes-600.webp" srcset="img/mercedes-600.webp 600w, img/mercedes-1200.webp 1080w" sizes="(max-width:760px) 50vw, 360px" alt="Руль и приборная панель старого «Мерседеса»" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/chess-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Партия в шахматы на ковре" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/embroidery-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Кремовое платье с золотой вышивкой" loading="lazy" decoding="async"></figure>
-      </div>
-    </article>
-    <article class="chap">
-      <div class="chap-text"><h3>Цветы и нежность</h3><span class="emoji" aria-hidden="true">🌹</span><p>Ромашки, белые розы и рыцари со старых картин.</p></div>
-      <div class="collage">
-        <figure class="print"><img src="img/daisies-600.webp" srcset="img/daisies-600.webp 600w, img/daisies-1200.webp 1080w" sizes="(max-width:760px) 50vw, 360px" alt="Букет ромашек в руке у тёмной двери" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/white-roses-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Белые розы и фата" loading="lazy" decoding="async"></figure>
-        <figure class="print"><img src="img/knight-600.webp" sizes="(max-width:760px) 40vw, 300px" alt="Рыцарь в доспехах обнимает девушку, старая картина" loading="lazy" decoding="async"></figure>
-      </div>
-    </article>
-  </div>
-</section>
-
-<section class="archive" id="archive" aria-labelledby="arch-h">
-  <h2 id="arch-h" data-blur>Архив канала</h2>
-  <p class="lead" data-rise>Все фотографии с доски канала. Крутите кольцо мышкой или пальцем, нажмите на фото, чтобы рассмотреть.</p>
-  <div class="arch-stage">
-    <canvas class="arch-canvas" aria-hidden="true"></canvas>
-    <p class="arch-cap" aria-live="polite"><span class="hand" data-arch-cap></span><span class="n" data-arch-n></span></p>
-    <ul class="arch-list" id="arch-list"></ul>
-  </div>
-</section>
-
-<section class="expand" id="evening" aria-labelledby="eve-h">
-  <div class="expand-media"><div class="sky" aria-hidden="true"></div></div>
-  <h2 class="expand-title" id="eve-h"><span class="w1">Каждый вечер</span> <span class="w2">в&nbsp;20:00</span></h2>
-  <div class="card-glass">
-    <p class="when" data-when>по московскому времени</p>
-    <div class="clock" data-clock aria-hidden="true"></div>
-    <p class="clock-cap">до нового альбома</p>
-    <ul class="facts">
-      <li>Ровно девять фотографий</li>
-      <li>Без слов — только один знак настроения</li>
-    </ul>
-    <a class="seal" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#seal"/></svg>Подписаться, чтобы не пропустить</a>
-  </div>
-</section>
-
-<section class="maker" id="card" aria-labelledby="card-h">
+<section class="maker dark" id="card" aria-labelledby="card-h">
   <div class="maker-head">
-    <h2 id="card-h" data-blur>Открытка из альбома</h2>
-    <p data-rise>Соберите открытку для сторис или свой альбом из девяти фото — и сохраните картинку.</p>
+    <h2 id="card-h">Открытка из альбома</h2>
+    <p>Соберите открытку для сторис или свой альбом из девяти фото — и сохраните картинку.</p>
   </div>
   <div class="maker-body">
     <div class="preview"><canvas id="cv" width="1080" height="1920" role="img" aria-label="Предпросмотр открытки"></canvas></div>
-    <div class="controls" data-rise-group>
+    <div class="controls">
       <div class="tabs" role="tablist" aria-label="Что собрать">
         <button role="tab" aria-selected="true" data-mode="card">Открытка</button>
         <button role="tab" aria-selected="false" data-mode="album">Альбом 3×3</button>
@@ -499,8 +304,8 @@ h2{font:500 clamp(44px,5.8vw,76px)/1.02 var(--display);letter-spacing:-.01em}
         <div class="fmt"><button type="button" data-fmt="story" aria-pressed="true">Сторис 9:16</button><button type="button" data-fmt="square" aria-pressed="false">Квадрат</button></div>
       </fieldset>
       <div class="actions">
-        <button type="button" class="btn btn-ink" id="save">Сохранить картинку</button>
-        <button type="button" class="btn" id="share" hidden>Поделиться</button>
+        <button type="button" class="pill" id="save">Сохранить картинку</button>
+        <button type="button" class="pill ghost" id="share" hidden>Поделиться</button>
       </div>
       <p class="msg" id="msg" role="status"></p>
     </div>
@@ -508,42 +313,46 @@ h2{font:500 clamp(44px,5.8vw,76px)/1.02 var(--display);letter-spacing:-.01em}
 </section>
 </main>
 
-<footer class="back-cover cloth">
-  <p class="huge foil">Эстетика</p>
-  <p class="huge-sub foil">в чистом виде</p>
-  <a class="seal" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener" data-rise><svg aria-hidden="true"><use href="#seal"/></svg>Подписаться в Telegram</a>
+<footer class="end dark">
+  <p class="huge">Эстетика</p>
+  <p class="huge-sub">в чистом виде</p>
+  <a class="seal" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#seal"/></svg>Подписаться в Telegram</a>
   <p class="credit">Сайт сделал Денис Стрепенюк. Хотите такой же — <a href="tel:+79773938033">+7&nbsp;977&nbsp;393-80-33</a></p>
 </footer>
 
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-labelledby="lb-cap" hidden>
   <div class="lb-bg" data-lb-close></div>
-  <figure class="print lb-fig"><img id="lb-img" alt=""></figure>
+  <figure class="lb-fig"><img id="lb-img" alt=""></figure>
   <div class="lb-info">
     <p class="lb-cap" id="lb-cap"></p>
     <p class="lb-sub">Из альбомов канала «Эстетика в чистом виде»</p>
-    <button type="button" class="btn btn-foil" id="lb-card">Сделать открытку с этим фото</button>
-    <a class="btn btn-ghost-foil" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener">Подписаться</a>
+    <button type="button" class="pill" id="lb-card">Сделать открытку с этим фото</button>
+    <a class="pill ghost" href="https://t.me/fiGlV7t6JrRhMmEy" target="_blank" rel="noopener">Подписаться</a>
   </div>
   <button type="button" class="lb-close" data-lb-close aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
 </div>
+<div class="toast" role="status" aria-live="polite"></div>
 
 <script src="js/gsap.min.js"></script>
-<script src="js/ScrollTrigger.min.js"></script>
 <script src="js/SplitText.min.js"></script>
 <script src="js/Flip.min.js"></script>
 <script src="js/Draggable.min.js"></script>
 <script src="js/InertiaPlugin.min.js"></script>
-<script src="js/lenis.min.js"></script>
-<script src="js/motion.js"></script>
+<script src="js/three.min.js"></script>
 <script>
-console.log('%cЭстетика в чистом виде — сайт сделал Денис Стрепенюк, +7 977 393-80-33', 'font:14px Georgia;color:#7b1f24');
+console.log('%cЭстетика в чистом виде — сайт сделал Денис Стрепенюк, +7 977 393-80-33', 'font:14px Georgia;color:#8f1f26');
+gsap.registerPlugin(SplitText, Flip, Draggable, InertiaPlugin);
 const TG = 'https://t.me/fiGlV7t6JrRhMmEy';
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const root = document.documentElement;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const motionOn = !reduce && !!window.gsap;
-const header = $('#top');
-const setSolid = on => header.classList.toggle('solid', on);
+const params = new URLSearchParams(location.search);
+const PIN_P = params.has('p') ? +params.get('p') : null;
+const PIN_T = params.has('t') ? +params.get('t') : null;
+const clamp01 = x => Math.min(1, Math.max(0, x));
+const easeIO = t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+const easeOut = t => 1 - (1 - t) ** 3;
+const backOut = gsap.parseEase('back.out(1.3)');
 
 const PHOTOS = {
   sky: 'Двое танцуют под золотыми облаками', dome: 'Купол собора на закате', seal: 'Конверт с сургучом',
@@ -556,7 +365,10 @@ const PHOTOS = {
   'white-roses': 'Белые розы', knight: 'Рыцарь и девушка', heart: 'Сердце «you»'
 };
 const IDS = Object.keys(PHOTOS);
-const idOf = img => (img.getAttribute('src').match(/img\/(.+)-600\.webp/) || [])[1];
+const ALBUM = ['dome', 'seal', 'shadow-dance', 'arches', 'lamp', 'letters', 'napoleon', 'roses', 'ceiling'];
+const NEXT = ['parliament', 'envelopes', 'dance-paint', 'statue', 'mercedes', 'daisies', 'candles', 'paris-hands', 'embroidery'];
+const REST = IDS.filter(id => !ALBUM.includes(id) && !NEXT.includes(id));
+const LABELS = { dome: 'старая Европа', seal: 'письма', 'shadow-dance': 'танцы', napoleon: 'музеи' };
 
 /* ---------- расписание: альбом каждый день в 20:00 МСК ---------- */
 const MSK = 3 * 3600e3, DAY = 864e5;
@@ -570,93 +382,68 @@ function schedule(now = Date.now()) {
 }
 const pad = n => String(n).padStart(2, '0');
 function hm(ms) { const m = Math.ceil(ms / 6e4), h = Math.floor(m / 60); return h ? `${h} ч ${m % 60} мин` : `${m} мин`; }
-const statusEl = $('[data-status]'), whenEl = $('[data-when]'), clockEl = $('[data-clock]');
 function tick() {
   const s = schedule();
-  statusEl.textContent = s.fresh ? 'Сегодняшний альбом уже в канале'
+  $('[data-status]').textContent = s.fresh ? 'Сегодняшний альбом уже в канале'
     : `Новый альбом ${s.tomorrow ? 'завтра' : 'сегодня'} в 20:00, через ${hm(s.left)}`;
-  whenEl.textContent = s.fresh ? 'Сегодняшний уже вышел — загляните в канал'
-    : `${s.tomorrow ? 'завтра' : 'сегодня'} в 20:00 по Москве`;
+  $('[data-when]').textContent = s.fresh ? 'сегодняшний уже вышел — загляните в канал'
+    : `до нового альбома, ${s.tomorrow ? 'завтра' : 'сегодня'} по Москве`;
   const t = Math.floor(s.left / 1000);
   const str = `${pad(Math.floor(t / 3600))}:${pad(Math.floor(t / 60) % 60)}:${pad(t % 60)}`;
-  clockEl.innerHTML = [...str].map(c => c === ':' ? '<span class="c">:</span>' : `<span class="d">${c}</span>`).join('');
+  $('[data-clock]').innerHTML = [...str].map(c => c === ':' ? '<span class="c">:</span>' : c).join('');
 }
 tick(); setInterval(tick, 1000);
 
-/* ---------- прогресс чтения и подсветка раздела ---------- */
-const bar = $('.progress i');
-const onScroll = () => {
-  const max = document.documentElement.scrollHeight - innerHeight;
-  bar.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
-};
-addEventListener('scroll', onScroll, { passive: true }); onScroll();
-const navLinks = $$('.nav a');
-const io = new IntersectionObserver(es => es.forEach(e => {
-  if (!e.isIntersecting) return;
-  navLinks.forEach(a => a.classList.toggle('on', a.hash === '#' + e.target.id));
-  const on = navLinks.find(a => a.classList.contains('on'));
-  if (on && innerWidth <= 760) on.parentElement.scrollTo({ left: on.offsetLeft - 16, behavior: 'smooth' });
-}), { rootMargin: '-45% 0px -50% 0px' });
-['album', 'chapters', 'archive', 'evening', 'card'].forEach(id => io.observe(document.getElementById(id)));
+/* ---------- тост ---------- */
+const toastEl = $('.toast');
+let toastT;
+function toast(text) {
+  toastEl.textContent = text; toastEl.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('show'), 3200);
+}
 
-/* ---------- просмотр фото: GSAP Flip + пружины Motion ---------- */
+/* ---------- запасной альбом без WebGL ---------- */
+$('.fallback').innerHTML = ALBUM.map(id => `<img src="img/${id}-sq-600.webp" alt="" loading="lazy">`).join('');
+
+/* ---------- просмотр фото: перелёт GSAP Flip ---------- */
 const lb = $('#lb'), lbImg = $('#lb-img'), lbCap = $('#lb-cap'), lbInfo = $('.lb-info'), lbBg = $('.lb-bg');
-let lbFrom = null, lbId = null, lbReturn = null;
-const M = window.Motion;
-async function openPhoto(id, from) {          // from: DOM-картинка или прямоугольник на экране
-  lbId = id; lbFrom = from; lbReturn = document.activeElement;
-  lbImg.src = `img/${id}-600.webp`; lbImg.alt = PHOTOS[id] || '';
-  lbCap.textContent = PHOTOS[id] || '';
+let lbId = null, lbReturn = null;
+async function openPhoto(id, rect) {
+  lbId = id; lbReturn = document.activeElement;
+  lbImg.src = `img/${id}-600.webp`; lbImg.alt = PHOTOS[id];
+  lbCap.textContent = PHOTOS[id];
   try { await lbImg.decode(); } catch (e) {}
   let state = null;
-  if (motionOn && from) {
-    let ghost = from;
-    if (!(from instanceof Element)) {          // из WebGL: временная картинка на месте карточки
-      ghost = Object.assign(document.createElement('img'), { src: lbImg.src });
-      Object.assign(ghost.style, { position: 'fixed', left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height: from.height + 'px', objectFit: 'cover', zIndex: 160 });
-      document.body.append(ghost);
-    }
+  if (rect && !reduce) {
+    const ghost = Object.assign(document.createElement('img'), { src: `img/${id}-sq-600.webp` });
+    Object.assign(ghost.style, { position: 'fixed', left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px', objectFit: 'cover', zIndex: 160 });
+    document.body.append(ghost);
     ghost.dataset.flipId = lbImg.dataset.flipId = 'lb';
-    state = Flip.getState(ghost);
-    if (ghost !== from) ghost.remove();
+    state = Flip.getState(ghost); ghost.remove();
   }
-  lb.hidden = false;
-  window.lenis && lenis.stop();
-  const fig = lbImg.parentElement;
-  if (state) { fig.classList.add('flying'); Flip.from(state, { targets: lbImg, duration: .8, ease: 'expo.inOut', scale: true, onComplete: () => fig.classList.remove('flying') }); }
-  if (motionOn && M) {
-    M.animate(lbBg, { opacity: [0, 1] }, { duration: .35 });
-    M.animate(lbInfo, { opacity: [0, 1], x: [40, 0] }, { type: M.spring, bounce: .25, duration: .8, delay: .25 });
-  }
+  lb.hidden = false; root.classList.add('locked');
+  if (state) Flip.from(state, { targets: lbImg, duration: .8, ease: 'expo.inOut', scale: true });
+  gsap.fromTo(lbBg, { opacity: 0 }, { opacity: 1, duration: .35 });
+  gsap.fromTo(lbInfo, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: .7, delay: reduce ? 0 : .25, ease: 'power3.out' });
   $('.lb-close').focus();
   const big = new Image(); big.src = `img/${id}-1200.webp`;
   big.decode().then(() => { if (lbId === id) lbImg.src = big.src; }).catch(() => {});
 }
-async function closePhoto() {
+function closePhoto() {
   if (lb.hidden) return;
-  if (motionOn && M) {
-    M.animate(lbInfo, { opacity: 0, x: 30 }, { duration: .2 });
-    M.animate(lbBg, { opacity: 0 }, { duration: .3 });
-    if (lbFrom instanceof Element && lbFrom.getBoundingClientRect().bottom > 0) {
-      const state = Flip.getState(lbImg);
-      lbFrom.dataset.flipId = 'lb';
-      await new Promise(r => setTimeout(r, 120));
-      lb.hidden = true;
-      Flip.from(state, { targets: lbFrom, duration: .6, ease: 'expo.inOut', scale: true, zIndex: 160 });
-    } else {
-      await M.animate(lbImg, { opacity: 0, scale: .92 }, { duration: .25 });
-      lb.hidden = true; lbImg.style.opacity = ''; lbImg.style.transform = '';
-    }
-  } else lb.hidden = true;
-  lbImg.removeAttribute('data-flip-id'); lbId = null;
-  window.lenis && lenis.start();
+  gsap.to(lbInfo, { opacity: 0, x: 30, duration: .2 });
+  gsap.to(lbBg, { opacity: 0, duration: .3 });
+  gsap.to(lbImg, { opacity: 0, scale: .94, duration: .25, onComplete: () => {
+    lb.hidden = true; gsap.set(lbImg, { clearProps: 'all' }); lbImg.removeAttribute('data-flip-id');
+  } });
+  lbId = null; root.classList.remove('locked');
   lbReturn && lbReturn.focus && lbReturn.focus({ preventScroll: true });
 }
 lb.addEventListener('click', e => { if (e.target.closest('[data-lb-close]')) closePhoto(); });
 addEventListener('keydown', e => {
   if (lb.hidden) return;
   if (e.key === 'Escape') closePhoto();
-  if (e.key === 'Tab') {                        // фокус не уходит из окна просмотра
+  if (e.key === 'Tab') {
     const f = $$('button, a[href]', lb), i = f.indexOf(document.activeElement);
     e.preventDefault(); f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
   }
@@ -664,48 +451,28 @@ addEventListener('keydown', e => {
 $('#lb-card').addEventListener('click', () => {
   const id = lbId; closePhoto();
   st.mode = 'card'; st.photo = id; redraw();
-  const target = $('#card');
-  window.lenis ? lenis.scrollTo(target, { offset: -64 }) : target.scrollIntoView();
-});
-$$('.grid9 .print, .collage .print').forEach(fig => {
-  const img = $('img', fig);
-  Object.assign(fig, { tabIndex: 0 }); fig.setAttribute('role', 'button');
-  fig.setAttribute('aria-label', 'Рассмотреть: ' + img.alt);
-  const go = () => openPhoto(idOf(img), img);
-  fig.addEventListener('click', go);
-  fig.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
-});
-
-/* ---------- архив: кнопки (они же запасная сетка без WebGL) ---------- */
-const archList = $('#arch-list');
-archList.innerHTML = IDS.map((id, i) => `<li><button type="button" data-i="${i}" aria-label="Рассмотреть: ${PHOTOS[id]}"><img src="img/${id}-600.webp" alt="" loading="lazy" decoding="async"></button></li>`).join('');
-archList.addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  openPhoto(IDS[+b.dataset.i], root.classList.contains('has-webgl') ? null : $('img', b));
+  $('#card').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
 });
 
 /* ---------- открытка ---------- */
-const ALBUM9 = ['dome', 'seal', 'shadow-dance', 'arches', 'lamp', 'letters', 'napoleon', 'roses', 'ceiling'];
 const ACCENTS = ['🌟', '🕊', '🌹', '🩰', '🖤', '🦢', '❤️', '👼'];
 const PHRASES = ['муд по утрам', 'просто красиво', 'хочу туда', 'это любовь'];
-const st = { mode: 'card', photo: 'sky', accent: '🌟', text: 'муд по утрам', fmt: 'story', nine: [...ALBUM9] };
+const st = { mode: 'card', photo: 'sky', accent: '🌟', text: 'муд по утрам', fmt: 'story', nine: [...ALBUM] };
 const cv = $('#cv'), ctx = cv.getContext('2d');
 const msg = $('#msg'), saveBtn = $('#save'), shareBtn = $('#share');
-const C = { page: '#e5e4de', ink: '#23281f', muted: '#5d6256', corner: '#262722' };
+const C = { page: '#ebe7df', ink: '#1f1d1a', muted: '#6f6a61', border: '#f6f2ea' };
 const EMOJI = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-
 const cache = {};
 const loadImg = id => cache[id] ||= new Promise((ok, fail) => {
   const im = new Image(); im.decoding = 'async';
   im.onload = () => ok(im); im.onerror = fail; im.src = `img/${id}-1200.webp`;
 });
-const thumb = id => `<button type="button" data-id="${id}" aria-pressed="false" aria-label="${PHOTOS[id]}"><img src="img/${id}-600.webp" alt="" loading="lazy" decoding="async"></button>`;
+const thumb = id => `<button type="button" data-id="${id}" aria-pressed="false" aria-label="${PHOTOS[id]}"><img src="img/${id}-sq-600.webp" alt="" loading="lazy" decoding="async"></button>`;
 const pick1 = $('#pick1'), pick9 = $('#pick9');
 pick1.innerHTML = IDS.map(thumb).join('');
 pick9.innerHTML = IDS.map(thumb).join('');
 $('#accents').innerHTML = ACCENTS.map(a => `<button type="button" data-a="${a}" aria-pressed="false" aria-label="Знак ${a}">${a}</button>`).join('');
 $('#chips').innerHTML = PHRASES.map(p => `<button type="button">${p}</button>`).join('');
-
 function syncUI() {
   $$('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === st.mode));
   $$('.ctl[data-for]').forEach(f => f.hidden = f.dataset.for !== st.mode);
@@ -727,18 +494,16 @@ function coverDraw(im, x, y, w, h) {
   const s = Math.max(w / im.naturalWidth, h / im.naturalHeight), sw = w / s, sh = h / s;
   ctx.drawImage(im, (im.naturalWidth - sw) / 2, (im.naturalHeight - sh) / 2, sw, sh, x, y, w, h);
 }
-function corners(x, y, w, h, c) {
-  const o = c * .22;
-  ctx.save(); ctx.fillStyle = C.corner; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
-  [[x - o, y - o, 1, 1], [x + w + o, y - o, -1, 1], [x - o, y + h + o, 1, -1], [x + w + o, y + h + o, -1, -1]].forEach(([px, py, sx, sy]) => {
-    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + sx * c, py); ctx.lineTo(px, py + sy * c); ctx.closePath(); ctx.fill();
-  });
-  ctx.restore();
+// отпечаток: белое поле, мягкая тень, фото внутри — как на столе в сцене
+function printDraw(im, x, y, w, h, b) {
+  ctx.save(); ctx.shadowColor = 'rgba(40,24,12,.32)'; ctx.shadowBlur = 50; ctx.shadowOffsetY = 22;
+  ctx.fillStyle = C.border; ctx.fillRect(x - b, y - b, w + 2 * b, h + 2 * b); ctx.restore();
+  coverDraw(im, x, y, w, h);
 }
 function paper(W, H) {
   ctx.fillStyle = C.page; ctx.fillRect(0, 0, W, H);
   const g = ctx.createRadialGradient(W / 2, H * .42, H * .2, W / 2, H / 2, H * .8);
-  g.addColorStop(0, 'rgba(255,255,255,.18)'); g.addColorStop(1, 'rgba(60,62,50,.16)');
+  g.addColorStop(0, 'rgba(255,255,255,.18)'); g.addColorStop(1, 'rgba(60,50,40,.16)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 }
 function lines(text, max) {
@@ -752,7 +517,7 @@ function lines(text, max) {
 function footer(W, yTitle, sTitle, yLink, sLink) {
   ctx.textAlign = 'center'; ctx.fillStyle = C.ink;
   ctx.font = `600 ${sTitle}px "Cormorant Garamond", Georgia, serif`; ctx.fillText('Эстетика в чистом виде', W / 2, yTitle);
-  ctx.fillStyle = C.muted; ctx.font = `400 ${sLink}px "Old Standard TT", Georgia, serif`;
+  ctx.fillStyle = C.muted; ctx.font = `400 ${sLink}px Onest, sans-serif`;
   ctx.fillText('t.me/fiGlV7t6JrRhMmEy', W / 2, yLink);
 }
 let drawing = 0;
@@ -774,11 +539,8 @@ async function render() {
     footer(W, 1256, 52, 1302, 28);
   } else {
     const story = st.fmt === 'story';
-    const [x, y, w, h] = story ? [120, 170, 840, 1120] : [230, 64, 620, 620];
-    ctx.save(); ctx.shadowColor = 'rgba(30,25,15,.32)'; ctx.shadowBlur = 50; ctx.shadowOffsetY = 22;
-    ctx.fillStyle = '#cfcabf'; ctx.fillRect(x, y, w, h); ctx.restore();
-    coverDraw(ims[0], x, y, w, h);
-    corners(x, y, w, h, story ? 74 : 56);
+    const [x, y, w, h] = story ? [150, 200, 780, 1040] : [250, 80, 580, 580];
+    printDraw(ims[0], x, y, w, h, story ? 34 : 26);
     const fs = story ? 92 : 64;
     ctx.font = `400 ${fs}px "Marck Script", cursive`; ctx.fillStyle = C.ink; ctx.textAlign = 'center';
     const ls = st.text.trim() ? lines(st.text, story ? 900 : 860) : [];
@@ -822,285 +584,448 @@ if (navigator.canShare && navigator.canShare({ files: [new File([''], 'a.jpg', {
     catch (e) { if (e.name !== 'AbortError') msg.textContent = 'Не получилось поделиться — сохраните картинку'; }
   });
 }
-redraw();
-document.fonts && document.fonts.ready.then(() => Promise.all([
-  document.fonts.load('92px "Marck Script"'), document.fonts.load('600 52px "Cormorant Garamond"'), document.fonts.load('30px "Old Standard TT"')
-])).then(render).catch(() => {});
 
-/* ---------- three.js по запросу (общий для архива и неба) ---------- */
-let threeP;
-const loadScript = src => new Promise((ok, fail) => document.head.append(Object.assign(document.createElement('script'), { src, onload: ok, onerror: fail })));
-const loadThree = () => threeP ||= loadScript('js/three.min.js');
-
-/* ---------- архив: изогнутое 3D-кольцо из всех фото ---------- */
-const arch = { scroll: 0, drag: 0, idle: 0, cur: 0 };
-function initArchive() {
-  const canvas = $('.arch-canvas');
+/* =====================================================================
+   СЦЕНА «20:00»: отпечатки на столе, свет одного вечера
+   Позы: L0 альбом на столе → L1 стена → L2 кольцо вокруг камеры → L3 завтрашний альбом рубашкой вверх.
+   Таймлайн прокрутки двигает только скаляры M; поза каждого отпечатка — их смесь со сдвигом по порядку.
+   ===================================================================== */
+const M = { wall: 0, ring: 0, spin: 0, down: 0, day: 0, labels: 0 };
+const INTRO_END = 2.9;
+let IT = 0;                                   // время интро, с
+const scene3 = (() => {
+  const canvas = $('#gl');
   let renderer;
-  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch (e) { return; }
-  root.classList.add('has-webgl');
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  try {
+    if (!window.THREE) throw new Error('no three');
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  } catch (e) { root.classList.add('no-gl'); return null; }
+  const mob = innerWidth < 760;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, mob ? 1.75 : 2));
   renderer.outputEncoding = THREE.sRGBEncoding;
-  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(30, 1, .1, 50);
-  cam.lookAt(0, 0, 1);                                        // камера в центре кольца смотрит на +z
-  const N = IDS.length, R = 9, step = Math.PI * 2 / N, th = step * .86, H = R * th * 4 / 3;
-  const ring = new THREE.Group(); scene.add(ring);
-  const tl = new THREE.TextureLoader();
-  const cards = IDS.map((id, i) => {
-    const mat = new THREE.MeshBasicMaterial({ side: THREE.BackSide, transparent: true, opacity: 0, color: 0xd0d0d0 });
-    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(R, R, H, 16, 1, true, -th / 2, th), mat);
-    mesh.rotation.y = i * step; mesh.userData = { id, i };
-    ring.add(mesh);
-    tl.load(`img/${id}-600.webp`, t => {
-      t.encoding = THREE.sRGBEncoding; t.anisotropy = 4;
-      const ai = t.image.width / t.image.height, ac = 3 / 4;
-      const sx = ai > ac ? ac / ai : 1, sy = ai > ac ? 1 : ai / ac;
-      t.repeat.set(-sx, sy); t.offset.set((1 + sx) / 2, (1 - sy) / 2);   // «cover» + зеркало: смотрим изнутри
-      mat.map = t; mat.needsUpdate = true;
-      gsap.to(mat, { opacity: 1, duration: .9, delay: (i % 6) * .05 });
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(30, 1, .05, 120);
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const Y = V(0, 1, 0), X = V(1, 0, 0);
+
+  /* свет */
+  const hemi = new THREE.HemisphereLight(0xf6f1e8, 0xb8ab98, .8); scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xfff1df, 1.35);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(mob ? 1024 : 2048, mob ? 1024 : 2048);
+  Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 60 });
+  sun.shadow.bias = -.0005; sun.shadow.normalBias = .02;
+  scene.add(sun, sun.target);
+  const lamp = new THREE.PointLight(0xffc887, 0, 11, 1.6); lamp.position.set(-2.4, 3.4, 2.6); scene.add(lamp);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(90, 90).rotateX(-Math.PI / 2), new THREE.ShadowMaterial({ opacity: .2 }));
+  floor.material.color = new THREE.Color(0x3a2414);
+  floor.receiveShadow = true; scene.add(floor);
+
+  /* оборот отпечатка: бумага с тиснением */
+  function backTexture() {
+    const c = document.createElement('canvas'); c.width = c.height = 512;
+    const g = c.getContext('2d');
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+    t.center.set(.5, .5); t.rotation = Math.PI;      // рубашкой вверх надпись читается к зрителю
+    const draw = () => {
+      g.fillStyle = '#efe8dc'; g.fillRect(0, 0, 512, 512);
+      for (let i = 0; i < 2400; i++) { g.fillStyle = `rgba(90,70,50,${Math.random() * .05})`; g.fillRect(Math.random() * 512, Math.random() * 512, 1.5, 1.5); }
+      g.textAlign = 'center'; g.fillStyle = 'rgba(80,58,40,.32)';
+      g.font = '600 64px "Cormorant Garamond", Georgia, serif'; g.fillText('Эстетика', 256, 236);
+      g.font = '500 34px "Cormorant Garamond", Georgia, serif'; g.fillText('в чистом виде', 256, 282);
+      g.font = '300 26px Onest, sans-serif'; g.fillText('20:00', 256, 352);
+      t.needsUpdate = true;
+    };
+    draw();
+    // надпись на обороте — шрифтом сайта, как только он загрузится
+    Promise.all([document.fonts.load('600 64px "Cormorant Garamond"'), document.fonts.load('300 26px Onest')]).then(draw).catch(() => {});
+    return t;
+  }
+
+  /* отпечатки */
+  const CW = 1.14, TH = .012, PITCH = 1.3, R = 4.3, N = IDS.length, STEP = Math.PI * 2 / N;
+  const cardGeo = new THREE.BoxGeometry(CW, CW, TH), photoGeo = new THREE.PlaneGeometry(1, 1);
+  const paperMat = new THREE.MeshStandardMaterial({ color: 0xf6f2ea, roughness: .9 });
+  const edgeMat = new THREE.MeshStandardMaterial({ color: 0xe2dbcd, roughness: .9 });
+  const backMat = new THREE.MeshStandardMaterial({ map: backTexture(), roughness: .95 });
+  const loader = new THREE.TextureLoader();
+  const aniso = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647 - .5;
+  const prints = IDS.map((id, i) => {
+    const g = new THREE.Group();
+    const card = new THREE.Mesh(cardGeo, [edgeMat, edgeMat, edgeMat, edgeMat, paperMat, backMat]);
+    card.castShadow = card.receiveShadow = true; card.userData.i = i;
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .55, transparent: true, opacity: 0 });
+    const photo = new THREE.Mesh(photoGeo, mat);
+    photo.position.z = TH / 2 + .0015; photo.receiveShadow = true;
+    g.add(card, photo); scene.add(g);
+    const p = { id, i, g, card, mat, role: ALBUM.includes(id) ? 'album' : NEXT.includes(id) ? 'next' : 'rest', ready: false,
+      hv: 0, hvv: 0, flip: 0, L: [], ord: [0, 0, 0], ringY: 1.62 + .36 * Math.sin(i * 2.1), tilt: rnd() * .08 };
+    loader.load(`img/${id}-sq-600.webp`, t => {
+      t.encoding = THREE.sRGBEncoding; t.anisotropy = aniso;
+      mat.map = t; mat.needsUpdate = true; p.ready = true;
     });
-    return mesh;
+    return p;
   });
-  let vis = 4.2;
+  const byId = Object.fromEntries(prints.map(p => [p.id, p]));
+  const qFlat = new THREE.Quaternion().setFromAxisAngle(X, -Math.PI / 2);
+  const qDown = new THREE.Quaternion().setFromAxisAngle(X, Math.PI / 2);
+  const qYaw = a => new THREE.Quaternion().setFromAxisAngle(Y, a);
+  const pose = (pos, q) => ({ p: pos, q });
+  const grid = k => V(((k % 3) - 1) * PITCH, TH / 2, (Math.floor(k / 3) - 1) * PITCH);
+  const pile = (list, x0, z0) => list.forEach((id, k) => {
+    byId[id].pile = byId[id].pile || [];
+    byId[id].pile.push(pose(V(x0 + rnd() * .5, TH * (k + .5) * 1.05, z0 + rnd() * .5), qYaw(rnd() * 1.1).multiply(qFlat)));
+  });
+  pile([...NEXT, ...REST], 3.15, -.75);            // днём: архив в стопке справа, завтрашние снизу
+  pile([...REST, ...ALBUM], 3.15, -.75);           // в сумерках: сегодняшний альбом сверху стопки
+  ALBUM.forEach((id, k) => {
+    const p = byId[id];
+    p.L[0] = pose(grid(k), qYaw(rnd() * .06).multiply(qFlat));
+    p.L[1] = pose(V(((k % 3) - 1) * 1.5, 1.75 + (1 - Math.floor(k / 3)) * 1.5, rnd() * .7),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(rnd() * .08, rnd() * .16, rnd() * .07)));
+    p.L[3] = p.pile[0]; p.ord = [k, 0, k + 9];          // альбом есть только в вечерней стопке
+    p.introTilt = new THREE.Quaternion().setFromEuler(new THREE.Euler(rnd() * .9, rnd() * .5, rnd() * .7)).multiply(qFlat);
+  });
+  NEXT.forEach((id, k) => {
+    const p = byId[id];
+    p.L[0] = p.L[1] = p.pile[0];
+    p.L[3] = pose(grid(k), qYaw(rnd() * .05).multiply(qDown)); p.ord = [0, 0, k];
+  });
+  REST.forEach((id, k) => { const p = byId[id]; p.L[0] = p.L[1] = p.pile[0]; p.L[3] = p.pile[1]; p.ord = [0, 0, 18 + k]; });
+  // кольцо: альбом встаёт впереди (слоты −4…4), остальные дальше по кругу
+  const ringOrder = [...ALBUM, ...NEXT, ...REST];
+  ringOrder.forEach((id, k) => { byId[id].slot = k - 4; byId[id].ord[1] = Math.abs(k - 4); });
+
+  /* камера: состояния — простые числа, смешиваются теми же скалярами */
+  let CS;
+  function camStates() {
+    const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight, a = w / h, m = a < .9;
+    const fit = m ? 1.55 : a < 1.3 ? 1.2 : 1;
+    const orbit = (t, el, az, d, fov, sx, sy) => ({ p: [t[0] + d * Math.cos(el) * Math.sin(az), t[1] + d * Math.sin(el), t[2] + d * Math.cos(el) * Math.cos(az)], t, fov, sx, sy });
+    return {
+      intro: orbit([0, 0, 0], 1.5, -.05, 24 * fit, 30, 0, m ? -.08 : 0),
+      hero: orbit([.1, 0, .1], .98, -.3, 13.2 * fit, 30, m ? 0 : .21, m ? -.27 : 0),
+      wall: { p: [.6, 1.95, 13.6 * fit], t: [0, 1.75, 0], fov: 32, sx: m ? 0 : .15, sy: m ? .12 : 0 },
+      ring: { p: [0, 1.66, .001], t: [0, 1.62, -1], fov: m ? 74 : 52, sx: 0, sy: m ? .12 : .04 },
+      dusk: orbit([.1, 0, .1], 1.12, .24, 11.8 * fit * (m ? 1.15 : 1), 30, m ? 0 : .18, m ? -.33 : 0),
+    };
+  }
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const mixCam = (A, B, t) => ({ p: A.p.map((v, i) => lerp(v, B.p[i], t)), t: A.t.map((v, i) => lerp(v, B.t[i], t)), fov: lerp(A.fov, B.fov, t), sx: lerp(A.sx, B.sx, t), sy: lerp(A.sy, B.sy, t) });
+
+  /* свет вечера: день → золотой час → сумерки 20:00 */
+  const DAYS = [
+    { sun: [-6, 7, 6], sunC: 0xfff1df, sunI: 1.4, sky: 0xf6f1e8, gnd: 0xb8ab98, hemI: .75, bg1: '#ece8e0', bg2: '#dcd4c6', sh: .27, lamp: 0 },
+    { sun: [-9, 3.4, 3], sunC: 0xffb26a, sunI: 1.75, sky: 0xf2c393, gnd: 0x7b5a44, hemI: .5, bg1: '#f2c591', bg2: '#c47f5b', sh: .3, lamp: 0 },
+    { sun: [-9, 1.5, 2], sunC: 0xff7b4f, sunI: .4, sky: 0x34405e, gnd: 0x1b1a24, hemI: .55, bg1: '#1a2034', bg2: '#3a2b35', sh: .34, lamp: 1.8 },
+  ];
+  const ca = new THREE.Color(), cb = new THREE.Color();
+  const hexMix = (a, b, t) => '#' + ca.set(a).lerp(cb.set(b), t).getHexString();
+  const pin = $('.pin');
+  function applyDay(d) {
+    const [A, B, t] = d <= .55 ? [DAYS[0], DAYS[1], d / .55] : [DAYS[1], DAYS[2], (d - .55) / .45];
+    sun.position.set(...A.sun.map((v, i) => lerp(v, B.sun[i], t))).normalize().multiplyScalar(22);
+    sun.color.set(A.sunC).lerp(cb.set(B.sunC), t); sun.intensity = lerp(A.sunI, B.sunI, t);
+    hemi.color.set(A.sky).lerp(cb.set(B.sky), t); hemi.groundColor.set(A.gnd).lerp(cb.set(B.gnd), t); hemi.intensity = lerp(A.hemI, B.hemI, t);
+    floor.material.opacity = lerp(A.sh, B.sh, t); lamp.intensity = lerp(A.lamp, B.lamp, t);
+    pin.style.setProperty('--sky1', hexMix(A.bg1, B.bg1, t)); pin.style.setProperty('--sky2', hexMix(A.bg2, B.bg2, t));
+    root.classList.toggle('night', d > .72 || afterScene);
+  }
+
+  /* подписи тем на стене */
+  const labelsEl = $('.labels');
+  const lblEls = Object.entries(LABELS).map(([id, text]) => {
+    const el = document.createElement('div'); el.className = 'lbl'; el.textContent = text; labelsEl.append(el);
+    return { p: byId[id], el };
+  });
+
+  /* размер */
   function size() {
     const w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return;
-    renderer.setSize(w, h, false);
-    cam.aspect = w / h; vis = w < 700 ? 1.9 : 4.2;   // сколько карточек видно по ширине
-    cam.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(vis * step / 2) / cam.aspect));
-    cam.updateProjectionMatrix();
+    renderer.setSize(w, h, false); cam.aspect = w / h; CS = camStates();
   }
   new ResizeObserver(size).observe(canvas); size();
 
+  /* указатель: наведение и наклон к курсору */
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
-  let hovered = null, dragging = false;
-  const pick = (cx, cy) => {
+  const ptr = { x: 0, y: 0, sx: 0, sy: 0, mouse: false, cx: -1, cy: -1 };
+  const cards = prints.map(p => p.card);
+  const pickAt = (cx, cy) => {
     const r = canvas.getBoundingClientRect();
     ndc.set((cx - r.left) / r.width * 2 - 1, -(cy - r.top) / r.height * 2 + 1);
     ray.setFromCamera(ndc, cam);
-    return (ray.intersectObjects(cards)[0] || {}).object || null;
+    const hit = ray.intersectObjects(cards)[0];
+    return hit ? prints[hit.object.userData.i] : null;
   };
-  canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && !dragging) hovered = pick(e.clientX, e.clientY); canvas.style.cursor = hovered ? 'zoom-in' : ''; });
-  canvas.addEventListener('pointerleave', () => { hovered = null; });
-  const rectOf = mesh => {                                     // экранный прямоугольник карточки — для полёта в просмотр
-    const r = canvas.getBoundingClientRect(), a = mesh.rotation.y + ring.rotation.y, pts = [];
-    for (const da of [-th / 2, th / 2]) for (const y of [-H / 2, H / 2]) {
-      const v = new THREE.Vector3(R * Math.sin(a + da), y, R * Math.cos(a + da)).project(cam);
-      pts.push([(v.x + 1) / 2 * r.width + r.left, (1 - v.y) / 2 * r.height + r.top]);
+  canvas.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse') return;
+    ptr.mouse = true; ptr.cx = e.clientX; ptr.cy = e.clientY;
+    ptr.x = e.clientX / innerWidth * 2 - 1; ptr.y = e.clientY / innerHeight * 2 - 1;
+  });
+  canvas.addEventListener('pointerleave', () => { ptr.mouse = false; });
+  let hovered = null;
+
+  /* экранный прямоугольник отпечатка — для перелёта в просмотр */
+  const rectOf = p => {
+    const r = canvas.getBoundingClientRect(), xs = [], ys = [];
+    for (const [x, y] of [[-.5, -.5], [.5, -.5], [-.5, .5], [.5, .5]]) {
+      const v = p.g.localToWorld(V(x, y, TH)).project(cam);
+      xs.push((v.x + 1) / 2 * r.width + r.left); ys.push((1 - v.y) / 2 * r.height + r.top);
     }
-    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
     return { left: Math.min(...xs), top: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
   };
-  // перетаскивание с инерцией: GSAP Draggable + InertiaPlugin на невидимом «прокси»
-  gsap.registerPlugin(Draggable, InertiaPlugin);
-  let base = 0;
-  const k = () => step / (canvas.clientWidth / vis);
+
+  /* кольцо: прокрутка + перетаскивание с инерцией */
+  const ring = { drag: 0, idle: 0, rot: 0 };
+  const ringActive = () => M.ring > .9 && M.down < .1;
+  let base = 0, dragging = false;
+  const kpx = () => 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2) * cam.aspect) / canvas.clientWidth;
   Draggable.create(document.createElement('div'), {
     trigger: canvas, type: 'x', inertia: true, allowNativeTouchScrolling: true,
-    onPress() { base = arch.drag - this.x * -k(); dragging = true; },
-    onDrag() { arch.drag = base + this.x * -k(); },
-    onThrowUpdate() { arch.drag = base + this.x * -k(); },
+    onPress() { base = ring.drag - this.x * kpx(); },
+    onDragStart() { dragging = true; },
+    onDrag() { if (ringActive()) ring.drag = base + this.x * kpx(); },
+    onThrowUpdate() { if (ringActive()) ring.drag = base + this.x * kpx(); },
     onRelease() { dragging = false; },
     onClick(e) {
-      const p = e.changedTouches ? e.changedTouches[0] : e, m = pick(p.clientX, p.clientY);
-      if (m) openPhoto(m.userData.id, rectOf(m));
+      const pt = e.changedTouches ? e.changedTouches[0] : e;
+      const p = pickAt(pt.clientX, pt.clientY);
+      if (!p || IT < INTRO_END) return;
+      if (p.facedown) {
+        if (gsap.isTweening(p)) return;
+        gsap.to(p, { flip: 1, duration: .75, ease: 'power3.inOut', yoyo: true, repeat: 1, repeatDelay: 1.2 });
+        toast('Подглядели. Остальные восемь — в 20:00 в канале');
+      } else openPhoto(p.id, rectOf(p));
     }
   });
-  // клавиатура: фокус на кнопке архива поворачивает кольцо к фото
-  archList.addEventListener('focusin', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    arch.drag = -(+b.dataset.i * step) - arch.scroll - arch.idle;
-  });
-  const capEl = $('[data-arch-cap]'), nEl = $('[data-arch-n]');
-  let front = -1, running = false, t0 = performance.now();
-  const white = new THREE.Color(0xffffff), dim = new THREE.Color(0xc4c4c4);
-  function frame() {
-    const now = performance.now(), dt = Math.min(64, now - t0); t0 = now;
-    if (!dragging && !hovered) arch.idle -= dt * .000035;
-    arch.cur += (arch.scroll + arch.drag + arch.idle - arch.cur) * .08;
-    ring.rotation.y = arch.cur;
-    cards.forEach((c, i) => {
-      c.material.color.lerp(hovered && c !== hovered ? dim : white, .1);
-      c.position.y = Math.sin(now * .0006 + i * .7) * .05;
-    });
-    const f = ((Math.round(-arch.cur / step) % N) + N) % N;
-    if (f !== front) { front = f; capEl.textContent = PHOTOS[IDS[f]]; nEl.textContent = `${f + 1} из ${N}`; }
+
+  /* кадр */
+  const P = V(0, 0, 0), Q = new THREE.Quaternion(), T = V(0, 0, 0), Qt = new THREE.Quaternion(), n = V(0, 0, 0), piv = V(0, 0, 0);
+  const stage = (m, ord, cnt, D = .4) => easeIO(clamp01((m - ord / Math.max(1, cnt - 1) * D) / (1 - D)));
+  let front = null;
+  function frame(dt, now) {
+    const intro = IT, ic = easeIO(clamp01((intro - .1) / 2.3));
+    // кольцо вращается прокруткой, перетаскиванием и медленно само
+    if (ringActive() && !dragging && !reduce) ring.idle -= dt * .035;
+    ring.rot = -M.spin * Math.PI * 1.4 + ring.drag + ring.idle;
+    // наведение
+    hovered = null;
+    if (ptr.mouse && intro >= INTRO_END && !dragging && lb.hidden) hovered = pickAt(ptr.cx, ptr.cy);
+    canvas.style.cursor = hovered ? (hovered.facedown ? 'pointer' : 'zoom-in') : (ringActive() ? 'grab' : '');
+
+    let best = Infinity;
+    for (const p of prints) {
+      // интро: альбом падает и проявляется, стопка въезжает справа
+      let drop = 1, dropRot = 1, dev = 1, slide = 1;
+      if (p.role === 'album') {
+        const k = p.ord[0], s0 = .25 + k * .085, b = (intro - s0) / .62;
+        drop = b <= 0 ? 0 : b >= 1 ? 1 : backOut(b); dropRot = b <= 0 ? 0 : b >= 1 ? 1 : 1 - (1 - b) ** 3;
+        dev = clamp01((intro - s0 - .4) / .9);
+      } else slide = easeOut(clamp01((intro - 1.5) / .9));
+      p.mat.opacity = p.ready ? dev : 0;
+      p.g.visible = drop > 0 || p.role !== 'album';
+
+      const L0 = p.L[0];
+      P.copy(L0.p); Q.copy(L0.q);
+      if (p.role === 'album') { P.y += (1 - drop) * 4.6; Q.copy(p.introTilt).slerp(L0.q, dropRot); }
+      else P.x += (1 - slide) * 7;
+      // стена
+      const e1 = p.role === 'album' ? stage(M.wall, p.ord[0], 9) : 0;
+      if (e1 > 0) { P.lerp(p.L[1].p, e1); Q.slerp(p.L[1].q, e1); P.z += Math.sin(Math.PI * e1) * .6; }
+      // кольцо
+      const e2 = stage(M.ring, p.ord[1], 27, .45);
+      if (e2 > 0) {
+        const th = p.slot * STEP + ring.rot;
+        T.set(R * Math.sin(th), p.ringY, -R * Math.cos(th));
+        Qt.setFromAxisAngle(Y, -th).multiply(new THREE.Quaternion().setFromAxisAngle(X, p.tilt));
+        P.lerp(T, e2); Q.slerp(Qt, e2); P.y += Math.sin(Math.PI * e2) * .7;
+        const a = Math.abs(Math.atan2(Math.sin(th), Math.cos(th)));
+        if (e2 > .99 && a < best) { best = a; front = p; }
+      }
+      // сумерки: завтрашний альбом рубашкой вверх, остальное в стопку
+      const e3 = stage(M.down, p.ord[2], 31, .5);
+      if (e3 > 0) { P.lerp(p.L[3].p, e3); Q.slerp(p.L[3].q, e3); P.y += Math.sin(Math.PI * e3) * 1.1; }
+      p.facedown = p.role === 'next' && e3 > .98;
+      // пружина наведения
+      const target = hovered === p && !reduce ? 1 : 0, h = Math.min(dt, 1 / 30);
+      p.hvv += ((target - p.hv) * 170 - p.hvv * 17) * h; p.hv += p.hvv * h;
+      // лёгкое дыхание в воздухе
+      if (!reduce) P.y += Math.sin(now * .0011 + p.i) * .035 * Math.max(e1 * (1 - e2), e2 * (1 - e3));
+      if (p.facedown || p.flip > 0) {
+        // подглядеть: поднять ближний край, перевернуть через дальний
+        const ang = .55 * Math.max(0, p.hv) + p.flip * Math.PI;
+        piv.set(P.x, P.y, P.z - CW / 2);
+        Qt.setFromAxisAngle(X, -ang);
+        P.sub(piv).applyQuaternion(Qt).add(piv); Q.premultiply(Qt);
+      } else if (p.hv) {
+        n.set(0, 0, 1).applyQuaternion(Q); P.addScaledVector(n, .3 * p.hv);
+      }
+      p.g.position.copy(P); p.g.quaternion.copy(Q);
+    }
+
+    // камера
+    let c = mixCam(CS.intro, CS.hero, ic);
+    // к сумеркам камера поднимается раньше, чем ложатся отпечатки, — не проходит у самой земли
+    c = mixCam(c, CS.wall, easeIO(M.wall)); c = mixCam(c, CS.ring, easeIO(M.ring)); c = mixCam(c, CS.dusk, easeOut(M.down));
+    const k = 1 - Math.exp(-dt * 3);
+    ptr.sx += ((ptr.mouse ? ptr.x : 0) - ptr.sx) * k; ptr.sy += ((ptr.mouse ? ptr.y : 0) - ptr.sy) * k;
+    const par = reduce ? 0 : (1 - M.ring * (1 - M.down)) * (1 - .5 * M.wall * (1 - M.ring));
+    cam.position.set(c.p[0] + ptr.sx * .35 * par, c.p[1] - ptr.sy * .2 * par, c.p[2]);
+    cam.lookAt(c.t[0], c.t[1], c.t[2]);
+    cam.fov = c.fov;
+    const w = canvas.clientWidth, hh = canvas.clientHeight;
+    cam.setViewOffset(w, hh, -c.sx * w, c.sy * hh, w, hh);
+    cam.updateProjectionMatrix();
+
+    applyDay(M.day);
+
+    // подписи тем
+    const la = M.labels;
+    for (const { p, el } of lblEls) {
+      if (la < .01) { el.style.opacity = 0; continue; }
+      const v = p.g.localToWorld(V(-CW / 2, CW / 2, TH)).project(cam);
+      el.style.transform = `translate3d(${((v.x + 1) / 2 * w).toFixed(1)}px, ${((1 - v.y) / 2 * hh - 26).toFixed(1)}px, 0)`;
+      el.style.opacity = la.toFixed(3);
+    }
+    // подпись фото напротив
+    if (front && M.ring > .9) {
+      const i = ringOrder.indexOf(front.id);
+      if (capId !== front.id) { capId = front.id; $('[data-cap]').textContent = PHOTOS[front.id]; $('[data-cap-n]').textContent = `${i + 1} из ${N}`; }
+    }
     renderer.render(scene, cam);
   }
-  new IntersectionObserver(([e]) => {
-    if (e.isIntersecting && !running) { running = true; t0 = performance.now(); gsap.ticker.add(frame); }
-    if (!e.isIntersecting && running) { running = false; gsap.ticker.remove(frame); }
-  }).observe(canvas);
+  let capId = null;
+  // для тестов: где отпечаток на экране
+  const screen = id => {
+    const v = byId[id].g.localToWorld(V(0, 0, 0)).project(cam), r = canvas.getBoundingClientRect();
+    return { x: (v.x + 1) / 2 * r.width + r.left, y: (1 - v.y) / 2 * r.height + r.top };
+  };
+  return { frame, size, screen, state: () => ({ front: front && front.id, hovered: hovered && hovered.id }) };
+})();
+
+/* ---------- интро и таймлайн прокрутки ---------- */
+const sceneEl = $('#scene'), hero = $('.hero'), cue = $('.cue');
+let afterScene = false;
+const split = SplitText.create('#h-hero', { type: 'words,chars' });
+const introTL = gsap.timeline({ paused: true })
+  .to('.intro-note', { opacity: 0, duration: .4 }, .15)
+  .fromTo(hero, { autoAlpha: 0 }, { autoAlpha: 1, duration: .01 }, 1.2)
+  .fromTo('.hero .eyebrow', { opacity: 0, y: 18, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: .5, ease: 'power2.out' }, 1.25)
+  .fromTo(split.chars, { opacity: 0, yPercent: 35, filter: 'blur(12px)' }, { opacity: 1, yPercent: 0, filter: 'blur(0px)', duration: .55, ease: 'power3.out', stagger: .025 }, 1.35)
+  .fromTo('.hero .lede, .hero .status', { opacity: 0, y: 22, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: .55, ease: 'power2.out' }, 1.75)
+  .fromTo('.hero .cta', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: .55, ease: 'power2.out' }, 1.95)
+  .fromTo(cue, { opacity: 0 }, { opacity: 1, duration: .5 }, 2.15)
+  .set({}, {}, INTRO_END);
+
+let scrollTL = null, target = 0, cur = 0;
+const glide = { p: 0, on: false };
+const sceneRange = () => Math.max(1, sceneEl.offsetHeight - innerHeight);
+function readScroll() {
+  target = clamp01((scrollY - sceneEl.offsetTop) / sceneRange());
+  afterScene = scrollY > sceneEl.offsetTop + sceneRange() + innerHeight * .3;
+  const max = document.documentElement.scrollHeight - innerHeight;
+  $('.progress i').style.transform = `scaleX(${max > 0 ? clamp01(scrollY / max) : 0})`;
+}
+addEventListener('scroll', readScroll, { passive: true });
+
+function buildScroll() {
+  gsap.set(['.p1', '.p2', '.p3'], { autoAlpha: 0 });
+  scrollTL = gsap.timeline({ paused: true, defaults: { ease: 'power2.inOut' } })
+    .to(hero, { autoAlpha: 0, y: -30, filter: 'blur(8px)', duration: .8, ease: 'power1.in' }, 0)
+    .to(cue, { opacity: 0, duration: .3 }, 0)
+    .to(M, { wall: 1, duration: 2.2 }, .2)
+    .fromTo('.p1', { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: .6, ease: 'power3.out' }, 1.8)
+    .to(M, { labels: 1, duration: .4, ease: 'none' }, 2.1)
+    .to('.p1', { autoAlpha: 0, y: -20, duration: .4, ease: 'power1.in' }, 3.4)
+    .to(M, { labels: 0, duration: .3, ease: 'none' }, 3.4)
+    .to(M, { ring: 1, duration: 1.8 }, 3.4)
+    .to(M, { day: .55, duration: 1.8, ease: 'sine.inOut' }, 3.4)
+    .fromTo('.p2', { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: .6, ease: 'power3.out' }, 4.9)
+    .to(M, { spin: 1, duration: 2, ease: 'none' }, 5)
+    .to('.p2', { autoAlpha: 0, y: -20, duration: .4, ease: 'power1.in' }, 6.9)
+    .to(M, { down: 1, duration: 1.8 }, 7)
+    .to(M, { day: 1, duration: 1.8, ease: 'sine.inOut' }, 7)
+    .fromTo('.p3', { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: .6, ease: 'power3.out' }, 8.5)
+    .set({}, {}, 10);
 }
 
-/* ---------- движение ---------- */
-if (!motionOn) {
-  // без анимаций: шапка становится светлой, когда обложка ушла вверх; архив — обычная сетка
-  new IntersectionObserver(([e]) => setSolid(!e.isIntersecting), { rootMargin: '0px 0px -94% 0px' }).observe($('.cover'));
-} else {
-  root.classList.add('js-motion');
-  gsap.registerPlugin(ScrollTrigger, SplitText, Flip);
+function finishIntro() {
+  IT = INTRO_END; introTL.time(INTRO_END);
+  gsap.set([hero, '.hero > *', split.chars], { clearProps: 'filter' });
+  root.classList.remove('intro');
+  try { sessionStorage.setItem('est3-seen', '1'); } catch (e) {}
+  if (!scrollTL) buildScroll();
+  readScroll(); cur = target;
+}
+const skip = () => { if (IT > .8 && IT < INTRO_END) finishIntro(); };
+addEventListener('wheel', e => e.deltaY > 20 && skip(), { passive: true });
+addEventListener('touchmove', skip, { passive: true });
+addEventListener('keydown', e => ['ArrowDown', 'PageDown', ' ', 'Escape'].includes(e.key) && skip());
 
-  const lenis = new Lenis({ autoRaf: false, anchors: { offset: -64 } });
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add(t => lenis.raf(t * 1000));
-  gsap.ticker.lagSmoothing(0);
-  window.lenis = lenis;
+/* навигация: скольжение по таймлайну к разделу */
+function goTo(p) {
+  if (IT < INTRO_END) finishIntro();
+  const top = sceneEl.offsetTop + p * sceneRange();
+  gsap.killTweensOf(glide);
+  Object.assign(glide, { p: cur, on: true });
+  gsap.to(glide, { p, duration: reduce ? 0 : .9 + Math.abs(p - cur) * 2.2, ease: 'power2.inOut', onComplete: () => { glide.on = false; } });
+  scrollTo({ top, behavior: 'instant' }); target = p;
+}
+['wheel', 'touchstart', 'keydown'].forEach(t => addEventListener(t, () => { if (glide.on) { gsap.killTweensOf(glide); glide.on = false; } }, { passive: true }));
+$$('[data-go]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); goTo(+a.dataset.go); }));
+$$('[data-sec]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); $('#card').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); }));
+const navLinks = $$('.nav a');
+const sectionAt = p => afterScene ? 'card' : p < .17 ? null : p < .46 ? '0.27' : p < .78 ? '0.6' : '0.97';
+let lastSec;
+function markNav() {
+  const s = sectionAt(cur); if (s === lastSec) return; lastSec = s;
+  navLinks.forEach(a => a.classList.toggle('on', (a.dataset.go || a.dataset.sec) === s));
+}
 
-  // заголовок проявляется из размытия по буквам (приём из шаблонов uberdesigner)
-  const blurIn = (el, onScroll = true) => {
-    const s = SplitText.create(el, { type: 'words,chars', wordsClass: 'w', charsClass: 'ch' });
-    el.classList.add('is-split');
-    return gsap.from(s.chars, {
-      opacity: 0, filter: 'blur(12px)', yPercent: 28, duration: 1, ease: 'power3.out', stagger: .024,
-      scrollTrigger: onScroll ? { trigger: el, start: 'top 86%', once: true } : undefined, paused: !onScroll
-    });
-  };
-
-  // Motion (бывший Framer Motion): секции появляются при прокрутке, кнопки отвечают пружиной
-  if (M) {
-    const rise = (els, delay = 0) => M.animate(els, { opacity: [0, 1], y: [26, 0] }, { type: M.spring, bounce: .2, duration: .9, delay });
-    $$('[data-rise]').forEach(el => { el.style.opacity = 0; M.inView(el, () => { rise(el); }, { amount: .3 }); });
-    $$('[data-rise-group]').forEach(g => {
-      const kids = [...g.children]; kids.forEach(k => k.style.opacity = 0);
-      M.inView(g, () => { rise(kids, M.stagger(.07)); }, { amount: .15 });
-    });
-    // только кнопки: фото двигает GSAP, две библиотеки на одном transform спорили бы
-    M.press('.btn, .seal, .thumbs button, .accents button, .chips button, .fmt button, .tabs button', el => {
-      M.animate(el, { scale: .95 }, { type: M.spring, stiffness: 700, damping: 30 });
-      return () => M.animate(el, { scale: 1 }, { type: M.spring, stiffness: 500, damping: 14 });
-    });
+/* ---------- один цикл на всё ---------- */
+let sceneVisible = true;
+new IntersectionObserver(([e]) => { sceneVisible = e.isIntersecting; }).observe(sceneEl);
+let last = performance.now();
+function loop() {
+  const now = performance.now(), dt = Math.min(.1, (now - last) / 1000); last = now;
+  if (IT < INTRO_END) {
+    // шаг не больше 1/15 с: лаг слегка тормозит интро, но на слабом телефоне оно не растягивается вдвое
+    if (PIN_T === null) IT = Math.min(INTRO_END, IT + Math.min(dt, 1 / 15));
+    introTL.time(IT);
+    if (IT >= INTRO_END) finishIntro();
+  } else if (scrollTL) {
+    if (glide.on) cur = glide.p; else cur += (target - cur) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(target - cur) < 1e-5) cur = target;
+    scrollTL.progress(cur);
   }
+  markNav();
+  if (scene3 && sceneVisible) scene3.frame(dt, now);
+  else root.classList.toggle('night', afterScene || M.day > .72);
+}
 
-  // прелоадер «проявка»: счётчик идёт за реальной загрузкой, но не быстрее 1,4 с
-  const coverIntro = () => {
-    const title = blurIn($('.title'), false);
-    gsap.timeline()
-      .add(title.play(), 0)
-      .from('.cameo', { scale: 1.12, opacity: 0, duration: 1.4, ease: 'expo.out' }, .1)
-      .from('.lede, .cover-cta > *', { opacity: 0, y: 18, duration: .9, ease: 'power3.out', stagger: .08 }, .45);
-  };
-  if (root.classList.contains('js-loading')) {
-    lenis.stop();
-    const num = $('.loader-num'), done = src => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = src; });
-    const jobs = [document.fonts.ready, done('img/sky-600.webp'), ...ALBUM9.map(id => done(`img/${id}-600.webp`))];
-    let loaded = 0; jobs.forEach(p => p.then(() => loaded++));
-    const start = performance.now(), shown = { v: 0 };
-    const step = () => {
-      const t = performance.now() - start;
-      const target = t > 4500 ? 100 : Math.min(loaded / jobs.length, t / 1400) * 100;
-      shown.v += (target - shown.v) * .14;
-      num.textContent = Math.round(shown.v);
-      if (shown.v < 99.5) return;
-      gsap.ticker.remove(step); num.textContent = 100;
-      try { sessionStorage.setItem('est-seen', '1'); } catch (e) {}
-      gsap.timeline({ onComplete: () => { root.classList.remove('js-loading'); lenis.start(); ScrollTrigger.refresh(); } })
-        .to('.loader > div', { opacity: 0, filter: 'blur(10px)', y: -20, duration: .5, ease: 'power2.in' })
-        .to('.loader', { clipPath: 'inset(0% 0% 100% 0%)', duration: .9, ease: 'expo.inOut' }, '-=.1')
-        .add(coverIntro, '-=.55');
-    };
-    gsap.ticker.add(step);
-  } else coverIntro();
-
-  // обложка ловит курсор: рамка наклоняется, камея и название — разные слои глубины
-  if (matchMedia('(pointer: fine)').matches) {
-    const front = $('.front'), frame = $('.frame');
-    const rx = gsap.quickTo(frame, 'rotationX', { duration: .8, ease: 'power3' }), ry = gsap.quickTo(frame, 'rotationY', { duration: .8, ease: 'power3' });
-    const cx = gsap.quickTo('.cameo', 'x', { duration: 1, ease: 'power3' }), cy = gsap.quickTo('.cameo', 'y', { duration: 1, ease: 'power3' });
-    front.addEventListener('pointermove', e => {
-      const nx = e.clientX / innerWidth - .5, ny = e.clientY / innerHeight - .5;
-      front.style.setProperty('--fx', (20 + (nx + .5) * 60) + '%');
-      ry(nx * 5); rx(-ny * 4); cx(nx * -14); cy(ny * -10);
-    });
-    front.addEventListener('pointerleave', () => { rx(0); ry(0); cx(0); cy(0); });
-  }
-
-  // ScrollTrigger создаём сверху вниз (правило из gsap-skills), после загрузки шрифтов
-  document.fonts.ready.then(() => {
-    // 1. обложка открывается при прокрутке
-    const stage = $('#cover');
-    stage.classList.add('stacked');
-    const open = gsap.timeline({ defaults: { ease: 'none' } })
-      .to('.cover', { rotateY: -128, duration: 1, ease: 'power1.in' }, 0)
-      .fromTo('.shade', { opacity: .6 }, { opacity: 0, duration: 1 }, 0)
-      .fromTo('.inside', { scale: .95 }, { scale: 1, duration: 1 }, 0)
-      .fromTo('.note .ln', { clipPath: 'inset(-10% 100% -10% 0)' }, { clipPath: 'inset(-10% 0% -10% 0)', duration: .3, stagger: .13 }, .42)
-      .set('.cover', { autoAlpha: 0 }, .98);
-    ScrollTrigger.create({ trigger: stage, start: 'top top', end: '+=150%', pin: true, scrub: .6, animation: open, onUpdate: s => setSolid(s.progress > .45) });
-
-    // 2. альбом: заголовок и калька
-    blurIn($('#album-h'));
-    gsap.fromTo('.glassine', { clipPath: 'inset(0% 0% 0% 0%)' }, {
-      clipPath: 'inset(0% 0% 100% 0%)', ease: 'power1.inOut',
-      scrollTrigger: { trigger: '.spread', start: 'top 70%', end: 'top 12%', scrub: .5 }
-    });
-
-    // 3. разделы: горизонтальная лента на пине + параллакс-слои (containerAnimation)
-    blurIn($('#chap-h'));
-    const mm = gsap.matchMedia();
-    mm.add('(min-width: 901px)', () => {
-      const sec = $('.chapters'), track = $('.track', sec);
-      sec.classList.add('js-pin');
-      const dist = () => Math.max(0, track.scrollWidth - innerWidth);
-      const slide = gsap.to(track, {
-        x: () => -dist(), ease: 'none',
-        scrollTrigger: { trigger: sec, start: 'top top', end: () => '+=' + dist(), pin: true, scrub: .6, invalidateOnRefresh: true }
-      });
-      $$('.chap', sec).forEach(chap => {
-        [['.chap-text', 6], ['.print:nth-child(1)', 10], ['.print:nth-child(2)', 20], ['.print:nth-child(3)', 15]].forEach(([sel, d]) => {
-          gsap.fromTo($(sel, chap), { yPercent: d }, { yPercent: -d, ease: 'none',
-            scrollTrigger: { trigger: chap, containerAnimation: slide, start: 'left right', end: 'right left', scrub: true } });
-        });
-      });
-      return () => sec.classList.remove('js-pin');
-    });
-
-    // 4. архив: на широком экране страница «крутит» кольцо, пока секция закреплена
-    blurIn($('#arch-h'));
-    mm.add('(min-width: 901px)', () => {
-      const sec = $('.archive');
-      sec.classList.add('js-pin-arch');
-      ScrollTrigger.create({ trigger: sec, start: 'top top', end: '+=140%', pin: true, scrub: true,
-        onUpdate: s => { arch.scroll = -s.progress * Math.PI * .8; } });
-      return () => { sec.classList.remove('js-pin-arch'); arch.scroll = 0; };
-    });
-    new IntersectionObserver(([e], obs) => {
-      if (!e.isIntersecting) return; obs.disconnect();
-      loadThree().then(initArchive).then(() => ScrollTrigger.refresh()).catch(() => {});
-    }, { rootMargin: '900px 0px' }).observe($('.archive'));
-
-    // 5. вечер: окно с закатом раскрывается на весь экран, слова разъезжаются (21st «scroll media expansion»)
-    const ex = $('.expand'); ex.classList.add('js-expand');
-    const startInset = () => innerWidth < 760 ? 'inset(30% 12% 30% 12% round 22px)' : 'inset(25% 33% 25% 33% round 28px)';
-    gsap.timeline({ scrollTrigger: { trigger: ex, start: 'top top', end: '+=140%', pin: true, scrub: .6, invalidateOnRefresh: true } })
-      .fromTo('.expand-media', { clipPath: startInset }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'power2.inOut', duration: 1 }, 0)
-      .fromTo('.sky', { opacity: 0 }, { opacity: 1, duration: .45 }, .4)        // в окне сначала фото заката, потом проступает живое небо
-      .fromTo('.expand .w1', { x: 0 }, { x: () => -innerWidth * .45, ease: 'power2.in', duration: .8 }, 0)
-      .fromTo('.expand .w2', { x: 0 }, { x: () => innerWidth * .45, ease: 'power2.in', duration: .8 }, 0)
-      .to('.expand-title', { opacity: 0, duration: .2 }, .6)
-      .fromTo('.expand .card-glass', { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: .35, ease: 'power2.out' }, .72);
-    if (innerWidth > 900) {                       // живое небо Vanta — только на больших экранах
-      new IntersectionObserver(([e], obs) => {
-        if (!e.isIntersecting) return; obs.disconnect();
-        loadThree().then(() => loadScript('js/vanta.clouds.min.js')).then(() => VANTA.CLOUDS({
-          el: $('.sky'), mouseControls: true, touchControls: false, gyroControls: false,
-          backgroundColor: 0xb48a68, skyColor: 0xa98468, cloudColor: 0xd8c3ae, cloudShadowColor: 0x35261f,
-          sunColor: 0xd99a5e, sunGlareColor: 0xc9805a, sunlightColor: 0xe0a878, speed: .6
-        })).catch(() => {});
-      }, { rootMargin: '600px 0px' }).observe(ex);
+/* ---------- старт: шрифты и первые фото, потом интро ---------- */
+const FACES = ['600 1em "Cormorant Garamond"', '300 1em Onest', '400 1em Onest', '500 1em Onest', '400 1em "Marck Script"'];
+const firstPhotos = ALBUM.map(id => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = `img/${id}-sq-600.webp`; }));
+Promise.race([Promise.all([...FACES.map(f => document.fonts.load(f)), ...firstPhotos]), new Promise(r => setTimeout(r, 5000))])
+  .catch(() => {})
+  .then(() => {
+    redraw();
+    if (PIN_T !== null) IT = PIN_T;
+    else if (PIN_P !== null || reduce || !root.classList.contains('intro')) finishIntro();
+    if (PIN_P !== null) {
+      const p = clamp01(PIN_P);
+      scrollTo({ top: sceneEl.offsetTop + p * sceneRange(), behavior: 'instant' });
+      readScroll(); target = cur = p; scrollTL.progress(p);
     }
-
-    // 6. открытка и задняя обложка
-    blurIn($('#card-h'));
-    $$('.huge, .huge-sub').forEach(el => {
-      const s = SplitText.create(el, { type: 'words,chars', wordsClass: 'w', charsClass: 'ch' });
-      el.classList.add('is-split');
-      gsap.from(s.chars, { yPercent: 18, scale: 1.18, opacity: 0, duration: .8, ease: 'power3.out', stagger: .05,
-        scrollTrigger: { trigger: '.back-cover', start: 'top 72%', once: true } });
-    });
-    ScrollTrigger.refresh();
+    readScroll();
+    gsap.ticker.add(loop);
   });
-  addEventListener('load', () => ScrollTrigger.refresh());
-}
+
+window.__scene = { screen: id => scene3 && scene3.screen(id), state: () => ({ intro: IT, p: cur, wall: M.wall, ring: M.ring, spin: M.spin, down: M.down, day: M.day, labels: M.labels, gl: !!scene3, ...(scene3 ? scene3.state() : {}) }) };
 </script>
 </body>
 </html>
